@@ -1,3 +1,15 @@
+# Beyond SEO 1.0.5 Visual Scorecards and Keyword Evidence Update
+
+Added client-reporting improvements:
+
+- Visual SEO scorecards using Markdown-safe progress bars, category scores, status labels, and priority heatmaps.
+- Authentic keyword evidence rules for Google Search Console, Google Ads Keyword Planner, Google Trends, Semrush, Ahrefs, Moz, DataForSEO, SE Ranking, Sistrix, Bing Webmaster Tools, Apify SERP scrapes, and manual SERP samples.
+- Competitor keyword verification rules separating confirmed competitor ranking keywords from inferred competitor targeted keywords.
+- SEO data tool workflow covering Semrush, Ahrefs, DataForSEO, Moz, Majestic, SE Ranking, Sistrix, Screaming Frog, Sitebulb, BrightLocal, Whitespark, Local Falcon, and AI visibility sources.
+- Website improvement text blocks for the top recommendations, including current problem, why it matters, recommended change, example improvement text, priority, and evidence.
+
+---
+
 # Beyond SEO 1.0.4 2026 SEO Intelligence Update
 
 Updated the skill for current SEO and AI-search behavior:

@@ -291,6 +291,20 @@ A Phase 6 seed file has been added early at `backlink-system/free-paid-backlink-
 
 
 
+## Visual Scorecards and Keyword Evidence Update - 1.0.5
+
+Beyond SEO reports can now include:
+
+- visual SEO scorecards with progress bars and status labels;
+- priority heatmaps for deciding what to fix first;
+- authentic keyword tables with source, date, location, volume, difficulty, rank, URL, action, and confidence;
+- competitor keyword tables that separate verified ranking keywords from inferred targeted keywords;
+- support for Semrush, Ahrefs, Moz, DataForSEO, SE Ranking, Sistrix, Bing Webmaster Tools, Google Search Console, Google Trends, Google Ads Keyword Planner, Apify SERP samples, and manual SERP checks;
+- written website improvement blocks for the top recommendations.
+
+The report must not invent tool data. If Semrush, Ahrefs, GSC, DataForSEO, or another source is not available, the report must say `Not verified` and recommend the exact export or access needed.
+
+
 ## 2026 SEO Intelligence Update - 1.0.4
 
 Beyond SEO now includes a current SEO intelligence layer for modern Google Search and AI-search work.

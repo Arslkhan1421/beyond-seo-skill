@@ -3,7 +3,7 @@ name: beyond-seo
 description: Use for SEO audits, AEO/GEO strategy, local SEO, backlink review, competitor research, keyword mapping, Apify/native scraping workflows, and client-ready SEO reporting.
 metadata:
   short-description: Advanced SEO, AEO/GEO, local SEO, backlinks, competitor research, and reporting
-  version: 1.0.4
+  version: 1.0.5
   compatibility: Codex, Claude Projects, OpenClaw, Cursor, MCP-enabled agents, custom file-based AI agents
   primary-file: SKILL.md
 ---
@@ -42,7 +42,7 @@ Never repeat a pasted token in final answers.
 # Beyond SEO — AI Agent Skill
 
 **Skill name:** Beyond SEO  
-**Version:** 1.0.4
+**Version:** 1.0.5
 **Purpose:** Advanced SEO + AEO/GEO + local SEO + backlink + competitor research skill for AI agents.  
 **Designed for:** Codex, Claude Projects, OpenClaw, Cursor, custom agent systems, local AI assistants, and any file-based agent runtime.  
 **Primary philosophy:** No fluff. No fake guarantees. No generic SEO checklists. Every recommendation must connect to ranking, qualified traffic, authority, conversion, local visibility, or AI-search visibility.
@@ -1072,28 +1072,115 @@ Every serious audit must end with:
 1. Executive Summary
 2. Current SEO Health Score
 3. Data Sources Used
-4. Confirmed Findings
-5. Technical SEO Issues
-6. Indexing/Crawlability Issues
-7. On-Page SEO Issues
-8. Content/E-E-A-T Issues
-9. Keyword Ranking Snapshot
-10. Top Existing Winners to Defend
-11. Top Missing Money Keywords
-12. Competitor Gap
-13. Content Gap
-14. Local SEO Gap
-15. Schema Gap
-16. AEO/GEO Visibility Gap
-17. Backlink/Authority Gap
-18. Conversion SEO Gap
-19. 30-Day Fix Plan
-20. 60-Day Growth Plan
-21. 90-Day Ranking Plan
-22. Expected Query/Lead Growth Model
-23. Exact Next Actions
-24. Data Not Available / Needed Next
+4. Visual SEO Scorecard
+5. Confirmed Findings
+6. Technical SEO Issues
+7. Indexing/Crawlability Issues
+8. On-Page SEO Issues
+9. Content/E-E-A-T Issues
+10. Authentic Keyword Snapshot
+11. Top Existing Winners to Defend
+12. Top Missing Money Keywords
+13. Competitor Keyword Gap
+14. Website Improvement Recommendations
+15. Content Gap
+16. Local SEO Gap
+17. Schema Gap
+18. AEO/GEO Visibility Gap
+19. Backlink/Authority Gap
+20. Conversion SEO Gap
+21. 30-Day Fix Plan
+22. 60-Day Growth Plan
+23. 90-Day Ranking Plan
+24. Expected Query/Lead Growth Model
+25. Exact Next Actions
+26. Data Not Available / Needed Next
 ```
+
+### Visual Scorecard Requirement
+
+Use simple text-safe visuals in client reports:
+
+```text
+Overall SEO Health: 72/100
+[##############------] 72%
+Status: Developing
+```
+
+Category score table:
+
+```text
+Technical SEO
+On-page SEO
+Content / E-E-A-T
+Keyword Architecture
+Authority / Backlinks
+Local SEO
+AEO / GEO
+Conversion / Tracking
+```
+
+Do not score unverified data. Use `Not verified` and explain what data source is needed.
+
+### Authentic Keyword and Tool Data Requirement
+
+Use authentic keyword and competitor data from available tools:
+
+```text
+Google Search Console
+Google Ads Keyword Planner
+Google Trends
+Semrush
+Ahrefs
+Moz
+DataForSEO
+SE Ranking
+Sistrix
+Bing Webmaster Tools
+Apify SERP scrape
+Manual SERP sample
+People Also Ask / related searches scrape
+```
+
+For every keyword table include:
+
+```text
+Keyword
+Intent
+Location
+Source
+Source date
+Volume if verified
+Difficulty if verified
+Current rank if verified
+Ranking URL if verified
+Action
+Confidence
+```
+
+For competitor keywords, separate:
+
+```text
+Competitor Ranking Keyword: verified from SERP/tool data.
+Competitor Targeted Keyword: inferred from competitor title/H1/content/schema/internal links, ranking not verified.
+```
+
+Never invent Semrush, Ahrefs, Moz, DataForSEO, GSC, or Bing data. If the user has no export/API/access, label those metrics as not verified and recommend the exact export needed.
+
+### Website Improvement Text Requirement
+
+For the top 5 recommendations, include written improvement blocks:
+
+```text
+Current problem
+Why it matters
+Recommended change
+Example improvement text
+Priority
+Evidence
+```
+
+Example improvement text can include title tags, H1s, meta descriptions, section outlines, FAQ drafts, CTA copy, schema notes, internal links, or technical acceptance criteria.
 
 ### Report Tone
 

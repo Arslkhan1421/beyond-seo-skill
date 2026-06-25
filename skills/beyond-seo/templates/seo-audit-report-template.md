@@ -30,16 +30,29 @@ Files/reports:
 
 ## 3. Current SEO Health Score
 
-| Category | Score | Notes |
-|---|---:|---|
-| Technical SEO | /20 | |
-| On-page SEO | /15 | |
-| Content / E-E-A-T | /20 | |
-| Keyword Architecture | /15 | |
-| Authority / Backlinks | /10 | |
-| Local SEO | /10 | |
-| AEO/GEO | /5 | |
-| Conversion / Tracking | /5 | |
+Overall SEO Health:
+
+```text
+[################----] __/100
+Status:
+```
+
+| Category | Score | Visual | Status | Notes |
+|---|---:|---|---|---|
+| Technical SEO | /20 | [--------------------] | Not verified | |
+| On-page SEO | /15 | [--------------------] | Not verified | |
+| Content / E-E-A-T | /20 | [--------------------] | Not verified | |
+| Keyword Architecture | /15 | [--------------------] | Not verified | |
+| Authority / Backlinks | /10 | [--------------------] | Not verified | |
+| Local SEO | /10 | [--------------------] | Not verified | |
+| AEO/GEO | /5 | [--------------------] | Not verified | |
+| Conversion / Tracking | /5 | [--------------------] | Not verified | |
+
+Scoring note:
+
+```text
+Only score verified categories. If data is missing, mark it Not verified rather than guessing.
+```
 
 ## 4. Biggest Opportunity
 
@@ -65,20 +78,53 @@ Files/reports:
 | Page/Cluster | Gap | Fix | Priority |
 |---|---|---|---|
 
-## 9. Keyword Snapshot
+## 9. Authentic Keyword Snapshot
 
-| Keyword | Rank | URL | Intent | Action |
-|---|---:|---|---|---|
+| Keyword | Intent | Location | Source | Source Date | Volume | Difficulty | Current Rank | Current URL | Action | Confidence |
+|---|---|---|---|---|---:|---:|---:|---|---|---|
+
+Data-quality note:
+
+```text
+Use GSC, Semrush, Ahrefs, Moz, DataForSEO, Google Keyword Planner, Google Trends, Bing Webmaster Tools, or live SERP samples where available. If unavailable, write Not verified.
+```
 
 ## 10. Keyword-to-Page Map
 
 | Cluster | Target URL | Existing/New | Priority |
 |---|---|---|---|
 
-## 11. Competitor Gap
+## 11. Competitor Keyword Gap
 
-| Competitor | Strength | Client Gap | Action |
-|---|---|---|---|
+| Competitor | Keyword | Evidence Type | Source | Competitor URL | Rank/Position | Client Gap | Action | Confidence |
+|---|---|---|---|---|---:|---|---|---|
+
+Evidence Type must be one of:
+
+```text
+Competitor Ranking Keyword
+Competitor Targeted Keyword
+```
+
+Do not present inferred competitor targeting as confirmed ranking.
+
+## 11.1 Website Improvement Recommendations
+
+Include the top 5 improvements in plain language.
+
+### Improvement 1: [Page or issue]
+
+Current problem:
+
+Why it matters:
+
+Recommended change:
+
+Example improvement text:
+
+Priority:
+
+Evidence:
 
 ## 12. Local SEO Gap
 

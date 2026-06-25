@@ -28,22 +28,24 @@ What data is missing?
 2. Data Sources Used
 3. Executive Summary
 4. Current SEO Health Snapshot
-5. Biggest Opportunity
-6. Biggest Blockers
-7. Technical SEO Findings
-8. On-Page SEO Findings
-9. Content / E-E-A-T Findings
-10. Keyword Snapshot
-11. Competitor Gap
-12. Local SEO Gap if relevant
-13. Backlink / Authority Gap
-14. AEO / GEO Gap
-15. Conversion SEO Gap
-16. 30-Day Fix Plan
-17. 60-Day Growth Plan
-18. 90-Day Ranking / Query Plan
-19. KPIs
-20. Missing Data / Next Checks
+5. Visual SEO Scorecard
+6. Biggest Opportunity
+7. Biggest Blockers
+8. Authentic Keyword Snapshot
+9. Competitor Keyword Gap
+10. Website Improvement Recommendations
+11. Technical SEO Findings
+12. On-Page SEO Findings
+13. Content / E-E-A-T Findings
+14. Local SEO Gap if relevant
+15. Backlink / Authority Gap
+16. AEO / GEO Gap
+17. Conversion SEO Gap
+18. 30-Day Fix Plan
+19. 60-Day Growth Plan
+20. 90-Day Ranking / Query Plan
+21. KPIs
+22. Missing Data / Next Checks
 ```
 
 ---
@@ -80,6 +82,78 @@ Priority
 
 ---
 
+## 4.1 Visual Scorecard Requirement
+
+Every client report should include a visual scorecard using text-safe visuals:
+
+```text
+Overall SEO Health: 72/100
+[##############------] 72%
+Status: Developing
+```
+
+Then include category scores:
+
+```text
+Technical SEO
+On-page SEO
+Content / E-E-A-T
+Keyword Architecture
+Authority / Backlinks
+Local SEO if relevant
+AEO / GEO
+Conversion / Tracking
+```
+
+If a category is not verified, show it as `Not verified` instead of guessing a score.
+
+---
+
+## 4.2 Authentic Keyword and Competitor Data
+
+Keyword and competitor keyword claims must include source labels.
+
+Use:
+
+```text
+GSC
+Google Ads Keyword Planner
+Google Trends
+Apify SERP scrape
+Ahrefs/Semrush/Moz/DataForSEO export
+Manual SERP sample
+Competitor crawl
+Bing Webmaster Tools
+```
+
+Separate:
+
+```text
+Competitor Ranking Keyword: verified from SERP/tool data.
+Competitor Targeted Keyword: inferred from competitor page title/H1/content, ranking not verified.
+```
+
+Never present inferred competitor targeting as confirmed ranking data.
+
+---
+
+## 4.3 Website Improvement Text
+
+For the top 5 recommendations, include a plain-English improvement block:
+
+```text
+Current problem
+Why it matters
+Recommended change
+Example improvement text
+Priority
+Evidence
+```
+
+These blocks should explain exactly what to change on the website, including title tags, H1s, page sections, FAQs, schema, CTAs, internal links, speed fixes, local proof, or conversion improvements where relevant.
+
+---
+
 ## 5. Report Tone
 
 The tone should be:
@@ -109,6 +183,7 @@ The website has [main strength], but growth is limited by [main blockers]. The f
 Use tables for:
 
 ```text
+Visual scores
 Issues
 Keywords
 Competitors

@@ -1,11 +1,11 @@
 {
   "name": "Beyond SEO",
   "slug": "beyond-seo",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Advanced portable SEO, AEO/GEO, local SEO, backlink, competitor research, and client reporting skill for AI agents.",
   "author": "BeyondTahir / PureDesigners",
   "license": "Internal / client-use friendly",
-  "status": "2026 SEO intelligence and AI-search reporting update",
+  "status": "visual scorecards and authentic keyword evidence update",
   "designed_for": [
     "Codex",
     "Claude Projects",
@@ -64,6 +64,10 @@
     "branded and non-branded query segmentation",
     "Google AI-search mythbusting",
     "spam-policy technical risk checks",
+    "visual SEO scorecards",
+    "authentic keyword evidence reporting",
+    "competitor keyword verification",
+    "website improvement text blocks",
     "source-worthiness and citation strategy",
     "tool and API capability detection",
     "toxic link risk review"
@@ -151,7 +155,7 @@
     "templates/page-brief-template.md",
     "templates/seo-audit-report-template.md"
   ],
-  "release_file": "beyond-seo-1.0.4-2026-seo-intelligence.zip",
+  "release_file": "beyond-seo-1.0.5-visual-scorecards-keyword-evidence.zip",
   "included_phases": [
     "Phase 1: Core Brain",
     "Phase 2: Apify + Scraping Engine",
@@ -172,7 +176,7 @@
     "MCP-enabled agents",
     "custom file-based AI agents"
   ],
-  "release_notes": "Adds 2026 SEO intelligence rules, official-source priority, Search Console generative AI performance report handling, branded/non-branded query segmentation, Google AEO/GEO mythbusting, and spam-risk checks for back button hijacking.",
+  "release_notes": "Adds visual SEO scorecards, authentic keyword evidence rules, Semrush/Ahrefs/DataForSEO-style source handling, competitor keyword verification, and website improvement text blocks for client-ready reports.",
   "apify_first": true,
   "default_required_token": "APIFY_API_TOKEN",
   "do_not_request_by_default": [

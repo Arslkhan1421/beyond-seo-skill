@@ -1,9 +1,9 @@
 {
   "package": "Beyond SEO",
-  "version": "1.0.4",
-  "release": "2026 SEO intelligence and AI-search reporting update",
+  "version": "1.0.5",
+  "release": "visual scorecards and authentic keyword evidence update",
   "root_folder": "beyond-seo",
-  "actual_files_count": 141,
+  "actual_files_count": 143,
   "ai_friendly_seo": true,
   "apify_first": true,
   "files": [
@@ -90,6 +90,7 @@
     "integrations/google-search-console.md",
     "integrations/native-agent-scraping.md",
     "integrations/pagespeed-insights.md",
+    "integrations/seo-data-tools-evidence.md",
     "keyword-research/keyword-clustering.md",
     "keyword-research/keyword-discovery.md",
     "keyword-research/keyword-to-page-map.md",
@@ -115,6 +116,7 @@
     "reporting/monthly-progress-report.md",
     "reporting/proposal-style-report.md",
     "reporting/technical-report.md",
+    "reporting/visual-scorecards-and-evidence.md",
     "reputation-seo/reputation-proof-stack.md",
     "reputation-seo/third-party-authority-article-system.md",
     "requirements.txt",
