@@ -28,6 +28,15 @@ Ask once for APIFY_API_TOKEN or Apify MCP setup.
 
 Do not ask for GSC, GA4, Ahrefs, Semrush, Moz, PageSpeed API, DataForSEO, or Firecrawl by default. Use Apify actors first for those workflows where available.
 
+For first-party behavior analysis, optionally use:
+
+```text
+CLARITY_API_TOKEN
+CLARITY_EXPORT_PATH
+```
+
+Only request Clarity access when behavior, UX, CRO, or verified page-friction evidence is in scope.
+
 ## Optional Python Requirements
 
 ```bash
@@ -133,6 +142,8 @@ Use this for PageSpeed Insights and Core Web Vitals where supported.
 ```text
 GSC_EXPORT_PATH
 GA4_EXPORT_PATH
+CLARITY_API_TOKEN
+CLARITY_EXPORT_PATH
 AHREFS_EXPORT_PATH
 SEMRUSH_EXPORT_PATH
 MOZ_EXPORT_PATH

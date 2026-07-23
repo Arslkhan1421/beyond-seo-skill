@@ -16,7 +16,10 @@ from pathlib import Path
 from typing import Iterable
 
 
-FIRST_PARTY = {"gsc", "google search console", "ga4", "google analytics", "gbp", "google business profile", "bing webmaster tools"}
+FIRST_PARTY = {
+    "gsc", "google search console", "ga4", "google analytics", "gbp",
+    "google business profile", "bing webmaster tools", "microsoft clarity", "clarity",
+}
 PAID_TOOLS = {"semrush", "ahrefs", "moz", "dataforseo", "sistrix", "se ranking", "majestic"}
 CRAWL_TOOLS = {"screaming frog", "sitebulb", "lumar", "jetoctopus", "crawl"}
 
@@ -32,7 +35,7 @@ def detect_source(path: Path, headers: Iterable[str], explicit: str | None) -> s
     candidates = [
         "google search console", "gsc", "google analytics", "ga4", "semrush",
         "ahrefs", "dataforseo", "moz", "screaming frog", "sitebulb",
-        "manual serp", "screenshot",
+        "microsoft clarity", "clarity", "manual serp", "screenshot",
     ]
     for candidate in candidates:
         if candidate in haystack:
@@ -41,6 +44,8 @@ def detect_source(path: Path, headers: Iterable[str], explicit: str | None) -> s
         return "google search console"
     if {"sessions", "users"}.intersection(set(norm(h) for h in headers)) and "conversions" in haystack:
         return "google analytics"
+    if {"metric name", "observed value"}.issubset(set(norm(h) for h in headers)):
+        return "microsoft clarity"
     return "unknown"
 
 
@@ -85,6 +90,11 @@ def metric_confidence(row: dict[str, str], level: str) -> tuple[str, str]:
             verified.append(metric)
         else:
             missing.append(metric)
+    if level == "First-party verified":
+        metric_name = str(headers.get("metric name") or "").strip()
+        observed_value = str(headers.get("observed value") or "").strip()
+        if metric_name and observed_value:
+            verified.append("behavior")
     if level in {"Not verified", "Inferred from competitor page", "Live SERP sample"}:
         restricted = {"volume", "difficulty", "traffic", "authority", "backlinks", "conversions"}
         verified = [m for m in verified if m not in restricted]

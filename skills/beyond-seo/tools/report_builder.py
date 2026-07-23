@@ -75,6 +75,40 @@ def sample_payload() -> dict[str, Any]:
             {"area": "Content / E-E-A-T", "score": 50, "display": "10 / 20", "note": "Needs more proof, examples, and expert depth."},
             {"area": "Authority / Backlinks", "score": None, "display": "Not verified", "note": "Requires Ahrefs/Semrush/Moz export."},
         ],
+        "clarity": {
+            "source": "Microsoft Clarity Data Export API",
+            "source_url": "https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-data-export-api",
+            "evidence_label": "First-party verified",
+            "retrieved_at": f"{date.today()}T00:00:00+00:00",
+            "window": "Previous 3 days, UTC",
+            "dimensions": "URL",
+            "metrics": [
+                {
+                    "metric": "Traffic",
+                    "segment": "URL: /services",
+                    "observed": "totalSessionCount: 125; PagesPerSessionPercentage: 1.8",
+                    "evidence_label": "First-party verified",
+                },
+                {
+                    "metric": "Rage Click Count",
+                    "segment": "URL: /contact",
+                    "observed": "sessionsWithMetricPercentage: 2.4",
+                    "evidence_label": "First-party verified",
+                },
+            ],
+            "signals": [
+                {
+                    "signal": "Rage Click Count",
+                    "scope": "URL: /contact",
+                    "evidence": "sessionsWithMetricPercentage: 2.4",
+                    "action": "Inspect repeated clicks, latency, overlays, and misleading controls.",
+                }
+            ],
+            "limitations": (
+                "Short-window behavior snapshot. Signals support investigation "
+                "and do not prove SEO causation."
+            ),
+        },
         "findings": [
             {"issue": "Key pages missing from sitemap", "evidence": "Service URLs absent from XML sitemap", "priority": "High", "fix": "Add all indexable service pages and resubmit in GSC."},
             {"issue": "Legacy URLs return 404", "evidence": "Old URLs still visible in samples", "priority": "High", "fix": "Map legacy URLs to direct 301 redirects."},
@@ -320,6 +354,57 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
                 row.get("note", ""),
             ])
         story.append(table(rows, [1.45 * inch, 0.85 * inch, 1.3 * inch, 2.75 * inch]))
+
+    clarity = payload.get("clarity") or {}
+    if clarity:
+        story.append(PageBreak())
+        story.append(p("Microsoft Clarity Behavior Insights", "H1x"))
+        story.append(p(
+            "First-party behavior evidence complements GSC, GA4, and CRM data. "
+            "It does not establish keyword rankings or prove that a behavior signal caused an SEO outcome."
+        ))
+        story.append(table(
+            [
+                ["Source", "Evidence", "Window", "Dimensions"],
+                [
+                    clarity.get("source", "Microsoft Clarity"),
+                    clarity.get("evidence_label", "Not verified"),
+                    clarity.get("window", "Not provided"),
+                    clarity.get("dimensions", "Not provided"),
+                ],
+            ],
+            [1.9 * inch, 1.45 * inch, 1.65 * inch, 1.35 * inch],
+        ))
+        if clarity.get("retrieved_at"):
+            story.append(p(f"Retrieved: {clarity.get('retrieved_at')}", "Smallx"))
+        if clarity.get("limitations"):
+            story.append(p(clarity.get("limitations"), "Smallx"))
+        clarity_metrics = clarity.get("metrics") or []
+        if clarity_metrics:
+            story.append(p("Observed Metrics and Segments", "H2x"))
+            story.append(table(
+                [["Metric", "Segment", "Observed Value", "Evidence"]]
+                + [[
+                    x.get("metric", ""),
+                    x.get("segment", ""),
+                    x.get("observed", ""),
+                    x.get("evidence_label", clarity.get("evidence_label", "")),
+                ] for x in clarity_metrics],
+                [1.25 * inch, 1.6 * inch, 2.7 * inch, 0.8 * inch],
+            ))
+        clarity_signals = clarity.get("signals") or []
+        if clarity_signals:
+            story.append(p("Behavior Signals to Investigate", "H2x"))
+            story.append(table(
+                [["Signal", "Scope", "Evidence", "Recommended Investigation"]]
+                + [[
+                    x.get("signal", ""),
+                    x.get("scope", ""),
+                    x.get("evidence", ""),
+                    x.get("action", ""),
+                ] for x in clarity_signals],
+                [1.15 * inch, 1.45 * inch, 1.65 * inch, 2.1 * inch],
+            ))
 
     findings = payload.get("findings") or []
     if findings:

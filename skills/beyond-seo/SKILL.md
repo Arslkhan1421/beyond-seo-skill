@@ -1,6 +1,6 @@
 ---
 name: beyond-seo
-description: Run evidence-led SEO audits, AEO/GEO and local strategy, technical crawls, live SERP and realistic competitor research, keyword/rank baselines, content optimization, developer briefs, professional PDF reports, historical comparisons, CSV imports, and optional LinkedIn/Instagram planning. Use for website SEO audits, ranking diagnosis, competitor gaps, content plans, recurring reports, and client-ready deliverables.
+description: Run evidence-led SEO audits, AEO/GEO and local strategy, technical crawls, live SERP and realistic competitor research, Microsoft Clarity behavior analysis, keyword/rank baselines, content optimization, developer briefs, professional PDF reports, historical comparisons, CSV imports, and optional LinkedIn/Instagram planning. Use for website SEO audits, ranking diagnosis, UX/friction evidence, competitor gaps, content plans, recurring reports, and client-ready deliverables.
 metadata:
   short-description: Evidence-led SEO, AEO/GEO, competitor, content, reporting, and social workflows
   version: 1.3.0
@@ -29,7 +29,7 @@ Beyond SEO is an evidence-led SEO operating system. Connect every recommendation
 Use only these labels:
 
 - `Confirmed`: directly observed crawl, HTML, HTTP, sitemap, robots, rendered page, or deterministic calculation.
-- `First-party verified`: authenticated/exported GSC, GA4, GBP, CRM, Bing, or equivalent owner data.
+- `First-party verified`: authenticated/exported GSC, GA4, Microsoft Clarity, GBP, CRM, Bing, or equivalent owner data.
 - `Paid-tool verified`: legitimate Semrush, Ahrefs, Moz, DataForSEO, Sistrix, Majestic, or similar export/API data.
 - `Screenshot verified`: dated screenshot with visible source and context.
 - `Technical crawl verified`: recognized crawler export with relevant fields.
@@ -44,8 +44,8 @@ For machine-readable provenance, use `tools/evidence_ledger.py`. It rejects rest
 ## Start sequence
 
 1. Identify the website, target country/location, services/products, and business goal.
-2. Check `APIFY_API_TOKEN` without printing it.
-3. Detect uploaded exports and available crawl/browser/PDF/spreadsheet tools.
+2. Check `APIFY_API_TOKEN` and optional `CLARITY_API_TOKEN` without printing them.
+3. Detect uploaded exports, including Microsoft Clarity JSON/CSV, and available crawl/browser/PDF/spreadsheet tools.
 4. Select the audit mode.
 5. Create or reuse a dated output directory; never overwrite the prior audit used for comparison.
 6. Run the reusable pipeline when code execution is available.
@@ -57,7 +57,7 @@ For machine-readable provenance, use `tools/evidence_ledger.py`. It rejects rest
 
 ### Full intelligence
 
-Use when crawl/SERP plus first-party and authority data are available. Combine live evidence with GSC, GA4/CRM, GBP, crawler, and paid-tool exports.
+Use when crawl/SERP plus first-party and authority data are available. Combine live evidence with GSC, GA4/CRM, Microsoft Clarity, GBP, crawler, and paid-tool exports.
 
 ### Apify intelligence
 
@@ -116,6 +116,7 @@ For a full-depth website audit, cover:
 - backlink/authority findings only when legitimate data exists;
 - PageSpeed/Lighthouse/CrUX findings only when a test succeeds;
 - CTA clarity, forms, calls/bookings, trust, and analytics/CRM measurement gaps.
+- Microsoft Clarity behavior evidence when available: engagement, scroll depth, rage/dead clicks, excessive scrolling, quick backs, script errors, consent/masking, and configured business events.
 
 Current Google AI-search guidance does not justify special AI schema, mass doorway variants, tiny artificial content chunks, or `llms.txt` claims for Google Search. Prefer crawlable, indexed, useful, expert-led content.
 
@@ -133,6 +134,7 @@ Load only the modules needed for the request:
 - Local SEO: `local-seo/local-landing-pages.md`, `local-seo/map-pack-audit.md`, `local-seo/google-business-profile.md`
 - Backlinks: `backlink-system/backlink-audit.md`, `backlink-system/link-gap-analysis.md`, `backlink-system/toxic-link-risk.md`
 - Reporting: `reporting/report-builder-pro.md`, `reporting/pdf-report-design-system.md`, `reporting/visual-scorecards-and-evidence.md`
+- Microsoft Clarity: `integrations/microsoft-clarity.md`; use `tools/clarity_export.py` for authenticated or saved exports
 - Social strategy: the five files under `social-media/`
 
 ## Competitor selection
@@ -155,6 +157,12 @@ For recurring audits, preserve each dated `audit-data.json` and run `tools/audit
 Use `tools/lighthouse_runner.py`. It attempts PageSpeed Insights, then locally installed Lighthouse. If neither completes, report `Not verified`; do not retain stale scores or infer Core Web Vitals.
 
 Field Lighthouse data and lab Lighthouse data are different. Keep CrUX field evidence separate from lab measurements.
+
+## Microsoft Clarity
+
+Treat Clarity as first-party behavior evidence, not ranking evidence. The Data Export API covers only the previous 1–3 days, up to three dimensions, 1,000 rows without pagination, and 10 requests per project per day. Record the UTC retrieval time and window.
+
+Add verified Clarity metrics and page-level friction signals to the PDF under **Microsoft Clarity Behavior Insights**. Do not infer causation, monthly trends, conversions, or SEO scores from short-window signals. Keep recordings, identifiers, and personal data out of reports. Verify consent and masking before recommending broader collection.
 
 ## Content and developer output
 
@@ -181,6 +189,7 @@ Report requirements:
 - data sources and confidence before scores;
 - observed scorecards that exclude unverified categories;
 - prioritized findings, rank baseline, qualified competitor gaps, direct website text, developer brief, roadmap, and exact data gaps;
+- a Microsoft Clarity behavior section when verified data exists, or an explicit Clarity data gap when it does not;
 - no copied proprietary logos or exact UI replicas;
 - no broken text score bars, unexplained rate-limit codes, clipped tables, or accidental blank pages.
 
@@ -202,7 +211,7 @@ Create platform-specific drafts, visual briefs, CTA, target URL, UTM URL, eviden
 
 ## Data imports
 
-Templates under `templates/data-imports/` cover GSC, GA4, Semrush, Ahrefs, Moz, DataForSEO, Screaming Frog, and Sitebulb. Preserve source dates and database/location fields. Reject incompatible or ambiguous columns instead of guessing.
+Templates under `templates/data-imports/` cover GSC, GA4, Microsoft Clarity, Semrush, Ahrefs, Moz, DataForSEO, Screaming Frog, and Sitebulb. Preserve source dates, retrieval windows, dimensions, and database/location fields. Reject incompatible or ambiguous columns instead of guessing.
 
 Use first-party and paid-tool metrics exactly as supplied. Explain that Semrush/Ahrefs/Moz authority, traffic, volume, and difficulty are vendor estimates, not Google measurements.
 
@@ -217,6 +226,7 @@ Before final delivery confirm:
 - current and previous findings are not mixed;
 - numeric scores exclude unverified areas;
 - technical tasks have acceptance criteria;
+- Clarity findings include the export window, source, evidence label, privacy limits, and no user-level data;
 - social drafts have approval status and no fabricated proof;
 - spreadsheet formulas contain no errors;
 - PDF QA passes and rendered pages were reviewed;

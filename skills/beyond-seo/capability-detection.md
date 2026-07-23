@@ -75,7 +75,7 @@ Check in this order:
 6. Native scraping/crawling access
 7. Apify API token or Apify MCP access
 8. PageSpeed API access
-9. GSC/GA4 exports or access
+9. GSC/GA4/Microsoft Clarity exports or access
 10. Ahrefs/Semrush/Moz exports or screenshots
 11. Google Business Profile data
 12. Ability to run scripts/tools
@@ -92,6 +92,8 @@ APIFY_API_TOKEN
 PAGESPEED_API_KEY
 GSC_EXPORT_PATH
 GA4_EXPORT_PATH
+CLARITY_API_TOKEN
+CLARITY_EXPORT_PATH
 AHREFS_EXPORT_PATH
 SEMRUSH_EXPORT_PATH
 MOZ_EXPORT_PATH
@@ -180,6 +182,7 @@ PDF reports
 CSV keyword exports
 GSC exports
 GA4 exports
+Microsoft Clarity JSON/CSV exports
 Ahrefs exports
 Semrush exports
 Moz exports
@@ -418,6 +421,24 @@ Need GSC for:
 Query-level SEO performance
 ```
 
+### Website URL + Microsoft Clarity
+
+Possible:
+
+```text
+Short-window URL/device/source behavior analysis
+Engagement and scroll observations
+Rage/dead clicks, excessive scrolling, quick backs, and script-error investigation
+Heatmap/recording review plan
+Conversion-event instrumentation recommendations
+```
+
+Need GSC, GA4, and CRM for:
+
+```text
+Search queries, reliable longer-term trends, qualified leads, revenue, and attribution
+```
+
 ### Website URL + GBP
 
 Possible:
@@ -466,6 +487,7 @@ High-value asks:
 ```text
 GSC export
 GA4 conversion report
+Microsoft Clarity export when behavior/CRO evidence would materially change the recommendations
 GBP performance data
 Competitor URLs
 Ahrefs/Semrush/Moz backlink export

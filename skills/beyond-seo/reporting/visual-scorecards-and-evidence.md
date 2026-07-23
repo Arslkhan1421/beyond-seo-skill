@@ -258,6 +258,7 @@ Why is the score justified?
 Which keywords are verified?
 Which competitor keywords are verified vs inferred?
 What exact website text/technical/content improvements should be made?
+What Microsoft Clarity behavior signals are verified, over which 1–3 day window, and what should be investigated?
 What data is missing?
 What should be done first?
 ```

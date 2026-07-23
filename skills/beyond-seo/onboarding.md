@@ -51,6 +51,7 @@ Ask for extra access only when:
 Apify cannot fetch the data.
 An authenticated first-party source is required.
 A user wants exact GSC/GA4/GBP performance.
+A user wants first-party behavior/friction evidence from Microsoft Clarity.
 A paid SEO database actor requires the user's own account/export.
 The user asks for official verification rather than directional data.
 ```
@@ -105,6 +106,7 @@ Preferred:
 
 ```text
 Environment variable: APIFY_API_TOKEN
+Environment variable: CLARITY_API_TOKEN when Clarity reporting is requested
 Agent secret manager
 Apify MCP configuration
 Secure runtime secret

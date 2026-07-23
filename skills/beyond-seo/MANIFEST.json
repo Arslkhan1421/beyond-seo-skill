@@ -1,9 +1,9 @@
 {
   "package": "Beyond SEO",
   "version": "1.3.0",
-  "release": "reusable audit runtime, provenance, comparison, and report QA",
+  "release": "reusable audit runtime, Microsoft Clarity behavior evidence, provenance, comparison, and report QA",
   "root_folder": "beyond-seo",
-  "actual_files_count": 183,
+  "actual_files_count": 186,
   "ai_friendly_seo": true,
   "apify_first": true,
   "files": [
@@ -92,6 +92,7 @@
     "integrations/fallback-without-apis.md",
     "integrations/google-analytics.md",
     "integrations/google-search-console.md",
+    "integrations/microsoft-clarity.md",
     "integrations/native-agent-scraping.md",
     "integrations/no-paid-seo-intelligence.md",
     "integrations/pagespeed-insights.md",
@@ -159,6 +160,7 @@
     "templates/data-imports/ga4-landing-pages-conversions.csv",
     "templates/data-imports/gsc-pages.csv",
     "templates/data-imports/gsc-queries.csv",
+    "templates/data-imports/microsoft-clarity-live-insights.csv",
     "templates/data-imports/moz-link-metrics.csv",
     "templates/data-imports/screaming-frog-internal.csv",
     "templates/data-imports/semrush-keyword-gap.csv",
@@ -181,6 +183,7 @@
     "tools/backlink_classifier.py",
     "tools/build_manifest.py",
     "tools/check_environment.py",
+    "tools/clarity_export.py",
     "tools/competitor_classifier.py",
     "tools/evidence_ledger.py",
     "tools/lighthouse_runner.py",
@@ -190,5 +193,6 @@
     "tools/sitemap_extractor.py",
     "tools/source_classifier.py",
     "tools/url_classifier.py"
-  ]
+  ],
+  "microsoft_clarity": true
 }

@@ -18,6 +18,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from audit_compare import compare
+from clarity_export import collect as collect_clarity
+from clarity_export import normalize_export as normalize_clarity_export
 from competitor_classifier import classify
 from evidence_ledger import EvidenceLedger
 from lighthouse_runner import collect as collect_performance
@@ -199,11 +201,60 @@ def build_findings(pages: list[dict], sitemap: dict, target_host: str) -> list[d
     return findings
 
 
+def collect_clarity_evidence(config: dict, output_dir: Path) -> dict | None:
+    settings = config.get("clarity") or {}
+    if not settings.get("enabled", False):
+        return None
+    num_days = int(settings.get("num_days", 3))
+    dimensions = settings.get("dimensions") or ["URL"]
+    export_path = settings.get("export_path") or os.getenv("CLARITY_EXPORT_PATH")
+    try:
+        if export_path:
+            raw = json.loads(Path(export_path).read_text(encoding="utf-8"))
+            if isinstance(raw, dict) and raw.get("source") == "Microsoft Clarity Data Export API" and raw.get("report_section"):
+                export = raw
+            else:
+                export = normalize_clarity_export(raw, num_days, dimensions)
+        else:
+            token = os.getenv(settings.get("token_env", "CLARITY_API_TOKEN"))
+            if not token:
+                return None
+            export = collect_clarity(token, num_days, dimensions)
+        (output_dir / "clarity-live-insights.json").write_text(
+            json.dumps(export, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        return export
+    except (OSError, ValueError, RuntimeError, requests.RequestException, json.JSONDecodeError) as exc:
+        return {
+            "source": "Microsoft Clarity",
+            "evidence_label": "Not verified",
+            "reason": str(exc),
+        }
+
+
 def report_payload(config: dict, audit: dict) -> dict:
     pages, findings = audit["pages"], audit["findings"]
     live = [page for page in pages if page.get("status") == 200]
     technical_score = max(0, 100 - 8 * len(findings))
-    return {
+    clarity = audit.get("clarity") or {}
+    clarity_verified = clarity.get("evidence_label") == "First-party verified"
+    data_gaps = [
+        row for row in config.get("data_gaps", [])
+        if not (clarity_verified and "clarity" in str(row.get("source", "")).lower())
+    ]
+    if not clarity_verified and not any("clarity" in str(row.get("source", "")).lower() for row in data_gaps):
+        data_gaps.append({
+            "source": "Microsoft Clarity",
+            "needed": "CLARITY_API_TOKEN or a dated 1–3 day Data Export API JSON/CSV export",
+        })
+    sources = [{"label": "Website", "url": config["website_url"]}]
+    if clarity_verified:
+        sources.append({
+            "label": "Microsoft Clarity Data Export API",
+            "url": clarity.get("source_url", "https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-data-export-api"),
+        })
+    payload = {
         "title": "Beyond SEO Full-Depth Audit", "client": config.get("client_name") or urlparse(config["website_url"]).netloc,
         "site_url": config["website_url"], "audit_date": audit["audit_date"][:10], "audit_mode": audit["audit_mode"],
         "overall_score": technical_score, "status": "Observed readiness; unverified categories excluded",
@@ -213,9 +264,12 @@ def report_payload(config: dict, audit: dict) -> dict:
         "findings": [{"issue": row["finding"], "evidence": json.dumps(row["evidence"], ensure_ascii=False), "priority": row["severity"], "fix": row["fix"]} for row in findings],
         "keywords": [{"keyword": row["keyword"], "intent": "Requires mapping", "source": row["source"], "volume": "Not verified", "difficulty": "Not verified", "action": "Review target page", "confidence": row["evidence_label"]} for row in audit["rank_baseline"]],
         "competitors": [{"competitor": row["domain"], "evidence": f"Position {row.get('observed_position')} for {row.get('ranking_keyword')}", "gap": row.get("classification"), "action": "Crawl and compare the ranking page."} for row in audit["competitors"].get("comparable", [])[:10]],
-        "roadmap": config.get("roadmap", []), "data_gaps": config.get("data_gaps", []),
-        "sources": [{"label": "Website", "url": config["website_url"]}],
+        "roadmap": config.get("roadmap", []), "data_gaps": data_gaps,
+        "sources": sources,
     }
+    if clarity_verified:
+        payload["clarity"] = clarity.get("report_section", {})
+    return payload
 
 
 def run(config: dict, output_dir: Path, previous: Path | None = None, build_report: bool = True) -> dict:
@@ -227,17 +281,45 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
     competitors = classify(candidates, config)
     findings = build_findings(pages, sitemap, target_host)
     performance = [collect_performance(config["website_url"], strategy, output_dir, os.getenv("PAGESPEED_API_KEY")) for strategy in ("mobile", "desktop")] if config.get("performance", {}).get("enabled", True) else []
+    clarity = collect_clarity_evidence(config, output_dir)
     ledger = EvidenceLedger()
     ledger.add(source_type="crawl", source_name="Native crawl", source_url=config["website_url"], method="requests + HTML parser", scope=f"{len(pages)} URLs", label="Confirmed", artifact_path=str(output_dir / "audit-data.json"))
     if baseline:
         ledger.add(source_type="serp", source_name="Apify Google Search Scraper", actor_id="apify/google-search-scraper", method="top-10 one-time sample", scope=f"{len(baseline)} queries", label="Live SERP sample", artifact_path=str(output_dir / "apify-serp-raw.json"))
+    if clarity and clarity.get("evidence_label") == "First-party verified":
+        ledger.add(
+            source_type="behavior analytics",
+            source_name="Microsoft Clarity Data Export API",
+            source_url=clarity.get("source_url", ""),
+            method="authenticated project export",
+            scope=f"Previous {clarity.get('num_days')} day(s); dimensions: {', '.join(clarity.get('dimensions') or []) or 'none'}",
+            label="First-party verified",
+            artifact_path=str(output_dir / "clarity-live-insights.json"),
+        )
+    clarity_verified = clarity and clarity.get("evidence_label") == "First-party verified"
+    audit_mode = "Apify + native crawl" if baseline else "Native crawl"
+    if clarity_verified:
+        audit_mode += " + Microsoft Clarity"
+    data_confidence = [
+        {"label": "Confirmed", "value": f"Native crawl: {len(pages)} URLs"},
+        {"label": "Live SERP sample", "value": f"{len(baseline)} one-time queries"},
+        {
+            "label": "First-party verified" if clarity_verified else "Not verified",
+            "value": (
+                f"Microsoft Clarity: previous {clarity.get('num_days')} day(s)"
+                if clarity_verified
+                else "Microsoft Clarity: connect CLARITY_API_TOKEN or provide a dated export"
+            ),
+        },
+        {"label": "Not verified", "value": "GSC, GA4, backlinks, proprietary volume/KD unless separately imported"},
+    ]
     audit = {
         "schema_version": "1.3.0", "audit_date": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
-        "audit_mode": "Apify + native crawl" if baseline else "Native crawl",
+        "audit_mode": audit_mode,
         "business_context": config, "robots": robots, "sitemap": sitemap, "pages": pages,
         "findings": findings, "rank_baseline": baseline, "competitors": competitors,
-        "performance": performance,
-        "data_confidence": [{"label": "Confirmed", "value": f"Native crawl: {len(pages)} URLs"}, {"label": "Live SERP sample", "value": f"{len(baseline)} one-time queries"}, {"label": "Not verified", "value": "GSC, GA4, backlinks, proprietary volume/KD unless separately imported"}],
+        "performance": performance, "clarity": clarity,
+        "data_confidence": data_confidence,
     }
     audit_path = output_dir / "audit-data.json"
     audit_path.write_text(json.dumps(audit, indent=2, ensure_ascii=False), encoding="utf-8")

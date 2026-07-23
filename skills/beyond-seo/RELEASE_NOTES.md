@@ -8,6 +8,7 @@ This release adds:
 - dated audit comparison with New, Improved, Changed, Unchanged, Resolved, and Reopened states;
 - PageSpeed collection with local Lighthouse fallback and plain-language failures;
 - permanent PDF builder QA for blank pages, broken bars, and replacement characters;
+- optional Microsoft Clarity Data Export API integration with evidence-safe behavior metrics, privacy gates, source classification, import template, and PDF reporting;
 - concise 223-line skill router, agent metadata, configuration template, fixtures, and automated tests.
 
 Older release history follows.

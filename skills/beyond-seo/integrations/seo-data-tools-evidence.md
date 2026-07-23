@@ -35,8 +35,8 @@ The classifier adds evidence level, verified metrics, missing metrics, and confi
 Use the strongest available source for each data type.
 
 ```text
-Own performance:
-Google Search Console, Bing Webmaster Tools, GA4, server logs, CRM/call tracking
+Own performance and behavior:
+Google Search Console, Bing Webmaster Tools, GA4, Microsoft Clarity, server logs, CRM/call tracking
 
 Keyword data:
 Google Search Console, Google Ads Keyword Planner, Semrush, Ahrefs, Moz, DataForSEO, SE Ranking, Sistrix, Google Trends, AlsoAsked, AnswerThePublic, Keywords Everywhere
@@ -233,7 +233,7 @@ Use trust labels:
 
 ```text
 First-party verified:
-GSC, GA4, GBP, Bing Webmaster Tools, CRM, server logs
+GSC, GA4, Microsoft Clarity, GBP, Bing Webmaster Tools, CRM, server logs
 
 Third-party verified:
 Semrush/Ahrefs/Moz/DataForSEO/etc. export or API result

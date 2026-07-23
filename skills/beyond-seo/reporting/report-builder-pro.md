@@ -6,7 +6,7 @@ Use this module when the user asks for a client-ready PDF, monthly report, propo
 
 - Website URL, brand name, target market, services, and business goal.
 - Crawl findings, SERP samples, keyword tables, competitor rows, issue log, and roadmap.
-- Verified exports when available: GSC, GA4, Semrush, Ahrefs, Moz, DataForSEO, Screaming Frog, Sitebulb.
+- Verified exports when available: GSC, GA4, Microsoft Clarity, Semrush, Ahrefs, Moz, DataForSEO, Screaming Frog, Sitebulb.
 - Evidence labels for every metric.
 
 ## Report Modes
@@ -31,11 +31,12 @@ Include these sections for full reports:
 6. Page inventory and indexability.
 7. Keyword and SERP opportunity.
 8. Competitor gap.
-9. Content, E-E-A-T, AEO/GEO, local, and conversion gaps.
-10. Website improvement text.
-11. Prioritized action plan.
-12. 30/60/90-day roadmap.
-13. Data not available and recommended exports.
+9. Microsoft Clarity behavior insights when verified.
+10. Content, E-E-A-T, AEO/GEO, local, and conversion gaps.
+11. Website improvement text.
+12. Prioritized action plan.
+13. 30/60/90-day roadmap.
+14. Data not available and recommended exports.
 
 ## Visual Rules
 
@@ -43,6 +44,7 @@ Include these sections for full reports:
 - Mark unverified metrics as `Not verified`; never force them into numeric charts.
 - Use traffic-light severity, score bars, issue tables, keyword tables, and roadmap panels.
 - Do not copy Semrush, Ahrefs, Moz, DataForSEO, GSC, or GA4 branding or proprietary UI.
+- For Clarity, show the UTC retrieval time, 1–3 day window, dimensions, exact observed values, evidence label, and investigation action. Do not include recording links, identifiers, personal data, or causal claims.
 - Keep tables readable in PDF: short columns, wrapped text, and repeated headers.
 
 ## PDF Completion Contract

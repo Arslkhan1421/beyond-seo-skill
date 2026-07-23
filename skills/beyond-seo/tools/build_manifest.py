@@ -21,11 +21,12 @@ def main() -> None:
     payload.update({
         "package": "Beyond SEO",
         "version": "1.3.0",
-        "release": "reusable audit runtime, provenance, comparison, and report QA",
+        "release": "reusable audit runtime, Microsoft Clarity behavior evidence, provenance, comparison, and report QA",
         "root_folder": "beyond-seo",
         "actual_files_count": len(files) + 1,
         "ai_friendly_seo": True,
         "apify_first": True,
+        "microsoft_clarity": True,
         "files": ["MANIFEST.json", *files],
     })
     MANIFEST.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")

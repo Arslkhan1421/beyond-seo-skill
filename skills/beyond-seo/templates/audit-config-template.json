@@ -29,6 +29,15 @@
   "performance": {
     "enabled": true
   },
+  "clarity": {
+    "enabled": true,
+    "num_days": 3,
+    "dimensions": [
+      "URL"
+    ],
+    "token_env": "CLARITY_API_TOKEN",
+    "export_path": ""
+  },
   "roadmap": [
     {
       "timeframe": "0-30 days",
@@ -54,6 +63,10 @@
     {
       "source": "GA4 / CRM",
       "needed": "Organic landing pages, events, qualified leads, revenue, and source attribution"
+    },
+    {
+      "source": "Microsoft Clarity",
+      "needed": "Authenticated 1–3 day live-insights export, URL/device friction signals, consent status, and configured business events"
     },
     {
       "source": "Ahrefs / Semrush / Moz",

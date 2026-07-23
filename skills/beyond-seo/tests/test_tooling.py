@@ -6,16 +6,20 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from pypdf import PdfReader
+
 
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 sys.path.insert(0, str(TOOLS))
 
 from audit_compare import compare  # noqa: E402
+from clarity_export import normalize_export  # noqa: E402
 from competitor_classifier import classify  # noqa: E402
 from evidence_ledger import EvidenceLedger, normalize_record  # noqa: E402
 from pdf_qa import inspect_pdf  # noqa: E402
 from report_builder import build_pdf, sample_payload  # noqa: E402
+from source_classifier import detect_source, evidence_level  # noqa: E402
 
 
 class EvidenceTests(unittest.TestCase):
@@ -55,6 +59,34 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual(result["summary"]["Resolved"], 1)
 
 
+class ClarityTests(unittest.TestCase):
+    def test_normalizes_verified_behavior_and_flags_friction(self):
+        raw = [
+            {
+                "metricName": "Rage Click Count",
+                "information": [{
+                    "URL": "/contact?email=private@example.com",
+                    "rageClickCount": "2",
+                    "customEmail": "private@example.com",
+                }],
+            }
+        ]
+        export = normalize_export(raw, 3, ["URL"])
+        self.assertEqual(export["evidence_label"], "First-party verified")
+        self.assertEqual(export["report_section"]["metrics"][0]["segment"], "URL: /contact")
+        self.assertIn("customEmail: [redacted]", export["report_section"]["metrics"][0]["observed"])
+        self.assertEqual(export["report_section"]["signals"][0]["signal"], "Rage Click Count")
+
+    def test_source_classifier_recognizes_clarity(self):
+        source = detect_source(
+            Path("microsoft-clarity-live-insights.csv"),
+            ["metric_name", "observed_value", "url"],
+            None,
+        )
+        self.assertEqual(source, "microsoft clarity")
+        self.assertEqual(evidence_level(source), "First-party verified")
+
+
 class ReportTests(unittest.TestCase):
     def test_sample_pdf_passes_structural_qa(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -62,6 +94,8 @@ class ReportTests(unittest.TestCase):
             build_pdf(sample_payload(), output)
             result = inspect_pdf(output)
             self.assertTrue(result["passed"], result)
+            text = "\n".join(page.extract_text() or "" for page in PdfReader(str(output)).pages)
+            self.assertIn("Microsoft Clarity Behavior Insights", text)
 
 
 if __name__ == "__main__":

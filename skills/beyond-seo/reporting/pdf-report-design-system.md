@@ -349,6 +349,34 @@ Do not create fake GA4 charts. Show tracking data gap.
 
 ---
 
+### Microsoft Clarity behavior module
+
+Use only when authenticated Clarity Data Export API data, an owner-supplied dated export, or a dated dashboard screenshot exists.
+
+Show:
+
+```text
+Evidence label
+UTC retrieval time
+Previous 1–3 day window
+Dimensions used
+Traffic/engagement/scroll observations
+Rage clicks, dead clicks, excessive scrolling, quick backs, and script/error-click signals
+Affected URL or segment
+Recommended investigation or experiment
+API limits and privacy/consent note
+```
+
+Use exact values returned by the source. Do not convert behavior signals into an SEO ranking score, claim causation, or extrapolate the API window into a monthly trend. Keep recordings, identifiers, and personal data out of the PDF.
+
+If Clarity is unavailable:
+
+```text
+Microsoft Clarity: Not verified. Connect CLARITY_API_TOKEN or provide a dated export.
+```
+
+---
+
 ## 6. Chart Rules
 
 Allowed charts:
