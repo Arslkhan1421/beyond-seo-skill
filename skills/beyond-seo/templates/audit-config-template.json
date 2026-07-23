@@ -1,0 +1,63 @@
+{
+  "client_name": "Example Client",
+  "website_url": "https://example.com/",
+  "target_country": "USA",
+  "country_code": "us",
+  "language_code": "en",
+  "device": "desktop",
+  "services": [
+    "primary service",
+    "secondary service"
+  ],
+  "goals": [
+    "leads",
+    "sales"
+  ],
+  "queries": [
+    "primary service company usa",
+    "secondary service agency usa"
+  ],
+  "seed_urls": [],
+  "max_crawl_pages": 100,
+  "crawl_delay_seconds": 0.1,
+  "max_serp_queries": 20,
+  "serp_results_per_query": 10,
+  "apify": {
+    "enabled": true,
+    "credit_safe": true
+  },
+  "performance": {
+    "enabled": true
+  },
+  "roadmap": [
+    {
+      "timeframe": "0-30 days",
+      "actions": "Resolve confirmed technical and money-page issues.",
+      "outcome": "Cleaner crawl signals and stronger conversion pages."
+    },
+    {
+      "timeframe": "31-60 days",
+      "actions": "Publish proof-led service and support content.",
+      "outcome": "Improved topical depth and buyer confidence."
+    },
+    {
+      "timeframe": "61-90 days",
+      "actions": "Measure rankings, leads, links, and content performance.",
+      "outcome": "Evidence-led iteration."
+    }
+  ],
+  "data_gaps": [
+    {
+      "source": "GSC",
+      "needed": "Queries, pages, countries, devices, clicks, impressions, CTR, and average position"
+    },
+    {
+      "source": "GA4 / CRM",
+      "needed": "Organic landing pages, events, qualified leads, revenue, and source attribution"
+    },
+    {
+      "source": "Ahrefs / Semrush / Moz",
+      "needed": "Backlinks, referring domains, authority metrics, volume, and keyword difficulty"
+    }
+  ]
+}

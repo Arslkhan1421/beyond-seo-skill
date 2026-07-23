@@ -4,6 +4,30 @@ Use this file when the user asks for authentic keywords, competitor keywords, ba
 
 Beyond SEO can use outputs from SEO platforms, but must not pretend access exists.
 
+If the user asks to use Semrush, Ahrefs, DataForSEO, Moz, SERP tools, or "trending SEO tools" but no paid API/export/access is available, also load:
+
+```text
+integrations/no-paid-seo-intelligence.md
+integrations/seo-tool-methodology.md
+```
+
+Use that workflow to produce legitimate no-paid evidence from live SERP samples, competitor pages, public snippets, user-provided screenshots, CSV exports, and first-party data. Never clone, scrape, or imply access to proprietary paid-tool databases without authorization.
+
+If the user asks how these metrics work, how to imitate paid-tool workflows, or how to move from free checks to paid exports, load:
+
+```text
+integrations/seo-tool-methodology.md
+```
+
+For CSV export analysis, use:
+
+```text
+tools/source_classifier.py
+templates/data-imports/
+```
+
+The classifier adds evidence level, verified metrics, missing metrics, and confidence notes. Use the CSV templates when asking a client or team member for structured exports.
+
 ---
 
 ## 1. Preferred Evidence Stack
@@ -169,6 +193,21 @@ Not verified
 ```
 
 Never fill missing values from memory.
+
+### No-paid fallback
+
+When the only available evidence is public SERP and competitor page data, output:
+
+```text
+Source tool: Manual SERP sample / public competitor page review
+Volume: Not verified
+Difficulty: Not verified
+Current rank: Verified only if seen in the live sample
+Ranking URL: Verified only if seen in the live sample
+Confidence: Live sample or Inferred
+```
+
+Do not place manual estimates inside Semrush, Ahrefs, Moz, or DataForSEO columns.
 
 ---
 

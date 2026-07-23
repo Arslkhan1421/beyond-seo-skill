@@ -1,11 +1,11 @@
 {
   "name": "Beyond SEO",
   "slug": "beyond-seo",
-  "version": "1.0.5",
-  "description": "Advanced portable SEO, AEO/GEO, local SEO, backlink, competitor research, and client reporting skill for AI agents.",
+  "version": "1.3.0",
+  "description": "Evidence-led SEO, AEO/GEO, technical audit, competitor, rank tracking, reporting, and social strategy skill with a reusable automation runtime.",
   "author": "BeyondTahir / PureDesigners",
   "license": "Internal / client-use friendly",
-  "status": "visual scorecards and authentic keyword evidence update",
+  "status": "reusable audit runtime, provenance, comparison, and report QA update",
   "designed_for": [
     "Codex",
     "Claude Projects",
@@ -71,6 +71,12 @@
     "source-worthiness and citation strategy",
     "tool and API capability detection",
     "toxic link risk review"
+    ,"reusable audit runner"
+    ,"machine-readable evidence ledger"
+    ,"realistic competitor qualification"
+    ,"historical audit comparison"
+    ,"PageSpeed and Lighthouse fallback"
+    ,"automated PDF quality checks"
   ],
   "optional_environment_variables": [
     "APIFY_API_TOKEN",
@@ -93,7 +99,7 @@
     "capability-detection.md",
     "audit-modes.md"
   ],
-  "next_phase": "Optional Phase 8: tools, validators, final packaging, and QA",
+  "next_phase": "Optional authenticated integrations, persistent scheduling, and production UI",
   "quality_rules": {
     "do_not_invent_data": true,
     "label_estimates": true,
@@ -155,7 +161,7 @@
     "templates/page-brief-template.md",
     "templates/seo-audit-report-template.md"
   ],
-  "release_file": "beyond-seo-1.0.5-visual-scorecards-keyword-evidence.zip",
+  "release_file": "beyond-seo-1.3.0-runtime.zip",
   "included_phases": [
     "Phase 1: Core Brain",
     "Phase 2: Apify + Scraping Engine",
@@ -176,7 +182,7 @@
     "MCP-enabled agents",
     "custom file-based AI agents"
   ],
-  "release_notes": "Adds visual SEO scorecards, authentic keyword evidence rules, Semrush/Ahrefs/DataForSEO-style source handling, competitor keyword verification, and website improvement text blocks for client-ready reports.",
+  "release_notes": "Adds a reusable audit runner, evidence ledger, realistic competitor classifier, historical comparisons, PageSpeed-to-Lighthouse fallback, permanent report pipeline, PDF QA, test fixtures, and concise skill routing instructions.",
   "apify_first": true,
   "default_required_token": "APIFY_API_TOKEN",
   "do_not_request_by_default": [
@@ -202,5 +208,12 @@
     "reputation-seo/third-party-authority-article-system.md",
     "integrations/apify-ai-friendly-seo-workflows.md",
     "templates/ai-friendly-seo-report-template.md"
+    ,"core/automation-runtime.md"
+    ,"tools/audit_runner.py"
+    ,"tools/evidence_ledger.py"
+    ,"tools/competitor_classifier.py"
+    ,"tools/audit_compare.py"
+    ,"tools/lighthouse_runner.py"
+    ,"tools/pdf_qa.py"
   ]
 }

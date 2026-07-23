@@ -1,6 +1,6 @@
 # Apify-First Setup Update
 
-Beyond SEO 1.0.2 is Apify-first.
+Beyond SEO 1.3.0 is evidence-led and Apify-first, with a reusable audit runtime, provenance ledger, realistic competitor qualification, historical comparison, performance fallback, and report QA.
 
 ## Required Setup
 

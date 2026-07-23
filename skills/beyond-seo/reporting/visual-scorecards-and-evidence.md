@@ -4,6 +4,12 @@ Use this file whenever the user asks for a report, client audit, SEO dashboard, 
 
 The goal is to make Beyond SEO reports easier to understand while keeping every score evidence-based.
 
+For PDF output, also load:
+
+```text
+reporting/pdf-report-design-system.md
+```
+
 ---
 
 ## 1. Required Visual Score Elements

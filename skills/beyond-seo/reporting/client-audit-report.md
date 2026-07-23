@@ -4,6 +4,12 @@ This file defines how Beyond SEO creates client-ready SEO reports.
 
 The report must be clear enough for business owners and strong enough for technical teams.
 
+When the user asks for a PDF, polished file, dashboard-style report, or presentation-ready report, also load:
+
+```text
+reporting/pdf-report-design-system.md
+```
+
 ---
 
 ## 1. Report Purpose
