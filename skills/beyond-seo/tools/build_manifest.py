@@ -11,12 +11,17 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "MANIFEST.json"
 
 
+def package_file(path: Path) -> bool:
+    return (path.is_file() and "__pycache__" not in path.parts and path.suffix != ".pyc"
+            and path.name != ".env" and not path.name.startswith(".env.") and path.suffix != ".env")
+
+
 def main() -> None:
     payload = json.loads(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {}
     files = sorted(
         path.relative_to(ROOT).as_posix()
         for path in ROOT.rglob("*")
-        if path.is_file() and "__pycache__" not in path.parts and path.name != "MANIFEST.json"
+        if package_file(path) and path.name != "MANIFEST.json"
     )
     payload.update({
         "package": "Beyond SEO",

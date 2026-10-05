@@ -21,6 +21,7 @@ from first_party_quality import comparison_compatibility, validate_export
 from outcome_tracker import assess_outcome
 from report_builder import build_and_validate_pdf
 from lighthouse_runner import run_pagespeed, summarize_lighthouse
+from build_manifest import package_file
 
 
 def response(url="https://example.com/", status=200, text="<html><head><title>Example</title></head><body><h1>Example</h1><p>Useful information.</p></body></html>", headers=None):
@@ -245,6 +246,16 @@ class FirstPartyTests(unittest.TestCase):
 
 
 class ReproducibilityTests(unittest.TestCase):
+    def test_local_environment_files_are_excluded_from_package_inventory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for name in ('.env', '.env.production', 'private.env'):
+                path=Path(directory)/name
+                path.touch()
+                self.assertFalse(package_file(path))
+            public=Path(directory)/'SKILL.md'
+            public.touch()
+            self.assertTrue(package_file(public))
+
     def test_artifact_redacts_credentials_but_preserves_filter_queries(self):
         result = sanitize_artifact({"url": "https://name:SECRET@example.com/?category=tools&token=SECRET", "token": "SECRET"})
         self.assertNotIn("SECRET", json.dumps(result))
