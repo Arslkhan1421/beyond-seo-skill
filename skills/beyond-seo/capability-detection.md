@@ -235,14 +235,13 @@ Example:
 Confirmed: GSC export shows 1,240 clicks from the target country in the last 90 days.
 ```
 
-### Likely
-
+### Inferred
 Use when evidence strongly suggests something but full verification is missing.
 
 Example:
 
 ```text
-Likely: the page is thin because the visible crawlable content is under 500 words, but a full crawl export would confirm all templates.
+Inferred: short extracted content requires rendered page and intent review; word count alone does not establish thin content.
 ```
 
 ### Directional
@@ -255,17 +254,16 @@ Example:
 Directional: Apify Ahrefs-style actor suggests low authority, but this should be confirmed with Ahrefs/Moz/Semrush export.
 ```
 
-### Estimated
-
+### Directional
 Use for calculations based on assumptions.
 
 Example:
 
 ```text
-Estimated: at 10% visitor-to-query conversion, 500 monthly queries require around 5,000 qualified visits/interactions.
+Directional: at 10% visitor-to-query conversion, 500 monthly queries require around 5,000 qualified visits/interactions.
 ```
 
-### Not Verified
+### Not verified
 
 Use when a key data source was unavailable.
 

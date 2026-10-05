@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.4.0",
+  "review_date": "2026-10-05",
+  "use_rule": "Recheck applicable official docs and actual account/export capabilities during each audit. Dates describe this review, not perpetual freshness. Preserve conflicting claims until a current authoritative source or account evidence clarifies them.",
+  "entries": [
+    {
+      "topic": "Google indexation eligibility",
+      "source_url": "https://developers.google.com/search/docs/essentials/technical",
+      "last_verified": "2026-10-05",
+      "scope": "Google Search",
+      "guidance": "Crawl access, successful response and indexable content establish eligibility; indexing is not guaranteed. Robots blocking does not establish removal from search."
+    },
+    {
+      "topic": "Google AI search and measurement",
+      "source_url": "https://developers.google.com/search/docs/appearance/ai-features",
+      "additional_source_url": "https://developers.google.com/search/docs/fundamentals/ai-optimization-guide",
+      "last_verified": "2026-10-05",
+      "scope": "AI Overviews and AI Mode; property report availability must be checked",
+      "status": "Sources differ on report/eligibility wording; do not assume a dedicated report exists or is required",
+      "guidance": "Foundational SEO and useful content remain relevant. Do not prescribe special AI schema/files as prerequisites. Standard Web reporting cannot by itself isolate AI visibility. Use documented feature fields only when present in the actual property/export."
+    },
+    {
+      "topic": "GSC export completeness",
+      "source_url": "https://developers.google.com/search/blog/2022/10/performance-data-deep-dive",
+      "last_verified": "2026-10-05",
+      "scope": "Query rows and performance aggregation",
+      "guidance": "Anonymized queries and data limits can omit rows; explain gaps between exported query and property totals."
+    },
+    {
+      "topic": "CrUX field measurements",
+      "source_url": "https://web.dev/articles/crux-and-rum-differences",
+      "last_verified": "2026-10-05",
+      "scope": "Field aggregates versus lab Lighthouse",
+      "guidance": "CrUX uses a sliding 28-day window; preserve percentile, device and URL/origin scope. Lab scores are not field Core Web Vitals."
+    },
+    {
+      "topic": "Microsoft Clarity API",
+      "source_url": "https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-data-export-api",
+      "last_verified": "2026-10-05",
+      "scope": "Project live-insights API",
+      "guidance": "Authenticated short-window behavior exports require timestamps, documented API limits and privacy handling; verify limits before collection."
+    },
+    {
+      "topic": "Structured-data feature eligibility",
+      "source_url": "https://developers.google.com/search/docs/appearance/structured-data/search-gallery",
+      "last_verified": null,
+      "scope": "Specific supported rich-result type",
+      "guidance": "Check current feature eligibility before recommending markup; detected JSON-LD is not proof of valid rich-result eligibility."
+    },
+    {
+      "topic": "Google Business Profile policies",
+      "source_url": "https://support.google.com/business/answer/3038177",
+      "last_verified": null,
+      "scope": "Specific business type and location",
+      "guidance": "Verify applicable eligibility, address and representation rules before recommending changes."
+    }
+  ]
+}

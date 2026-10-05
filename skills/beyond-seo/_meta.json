@@ -1,11 +1,11 @@
 {
   "name": "Beyond SEO",
   "slug": "beyond-seo",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Evidence-led SEO, AEO/GEO, Microsoft Clarity behavior analysis, technical audit, competitor, rank tracking, reporting, and social strategy skill with a reusable automation runtime.",
   "author": "BeyondTahir / PureDesigners",
   "license": "Internal / client-use friendly",
-  "status": "reusable audit runtime, provenance, comparison, and report QA update",
+  "status": "traceable findings, coverage, reproducibility and data quality release",
   "designed_for": [
     "Codex",
     "Claude Projects",
@@ -62,7 +62,7 @@
     "page brief template",
     "paid backlink evaluation",
     "proposal-style reporting",
-    "Search Console generative AI performance report analysis",
+    "Conditional Search Console AI feature analysis when supported",
     "branded and non-branded query segmentation",
     "Google AI-search mythbusting",
     "spam-policy technical risk checks",
@@ -72,13 +72,19 @@
     "website improvement text blocks",
     "source-worthiness and citation strategy",
     "tool and API capability detection",
-    "toxic link risk review"
-    ,"reusable audit runner"
-    ,"machine-readable evidence ledger"
-    ,"realistic competitor qualification"
-    ,"historical audit comparison"
-    ,"PageSpeed and Lighthouse fallback"
-    ,"automated PDF quality checks"
+    "toxic link risk review",
+    "reusable audit runner",
+    "machine-readable evidence ledger",
+    "realistic competitor qualification",
+    "historical audit comparison",
+    "PageSpeed and Lighthouse fallback",
+    "automated PDF quality checks",
+    "traceable finding contracts",
+    "coverage-aware diagnostic scoring",
+    "GSC and GA4 export quality validation",
+    "traffic-drop differential diagnosis",
+    "implementation outcome tracking",
+    "reproducibility manifests"
   ],
   "optional_environment_variables": [
     "APIFY_API_TOKEN",
@@ -211,15 +217,15 @@
     "reputation-seo/reputation-proof-stack.md",
     "reputation-seo/third-party-authority-article-system.md",
     "integrations/apify-ai-friendly-seo-workflows.md",
-    "templates/ai-friendly-seo-report-template.md"
-    ,"core/automation-runtime.md"
-    ,"tools/audit_runner.py"
-    ,"tools/evidence_ledger.py"
-    ,"tools/competitor_classifier.py"
-    ,"tools/audit_compare.py"
-    ,"tools/lighthouse_runner.py"
-    ,"tools/pdf_qa.py"
-    ,"integrations/microsoft-clarity.md"
-    ,"tools/clarity_export.py"
+    "templates/ai-friendly-seo-report-template.md",
+    "core/automation-runtime.md",
+    "tools/audit_runner.py",
+    "tools/evidence_ledger.py",
+    "tools/competitor_classifier.py",
+    "tools/audit_compare.py",
+    "tools/lighthouse_runner.py",
+    "tools/pdf_qa.py",
+    "integrations/microsoft-clarity.md",
+    "tools/clarity_export.py"
   ]
 }

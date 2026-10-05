@@ -399,17 +399,17 @@ If the tool cannot inspect HTML, say so.
 Use:
 
 ```text
-Observed
-Likely
-Estimated
+Confirmed
+Inferred
+Directional
 Not verified
 ```
 
 Examples:
 
 ```text
-Observed: the homepage H1 is missing from visible content.
-Likely: the site may have JavaScript-rendering SEO issues because direct HTML shows very little body content.
+Confirmed: the homepage H1 is missing from visible content.
+Inferred: the site may have JavaScript-rendering SEO issues because direct HTML shows very little body content.
 Not verified: exact rankings and backlinks require GSC/rank/backlink data.
 ```
 

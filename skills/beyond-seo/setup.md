@@ -340,9 +340,8 @@ Use:
 
 ```text
 Confirmed
-Likely
+Inferred
 Directional
-Estimated
 Not verified
 ```
 

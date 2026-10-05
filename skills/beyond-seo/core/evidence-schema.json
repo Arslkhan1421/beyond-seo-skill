@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.4.0",
+  "labels": {
+    "Confirmed": ["direct_observation", "deterministic_calculation"],
+    "First-party verified": ["authenticated_api", "owner_export"],
+    "Paid-tool verified": ["authenticated_api", "owner_export"],
+    "Screenshot verified": ["dated_screenshot"],
+    "Technical crawl verified": ["trusted_crawler", "owner_export"],
+    "Live SERP sample": ["authenticated_api", "live_observation"],
+    "Live search sample": ["live_observation"],
+    "Inferred": [],
+    "Directional": [],
+    "Not verified": []
+  },
+  "finding_required_fields": [
+    "finding_id", "check_id", "affected_urls", "observation", "evidence_ids",
+    "source_artifact", "collected_at", "interpretation", "observation_label",
+    "interpretation_label", "confidence", "business_impact", "recommended_action",
+    "acceptance_criteria", "validation_method", "owner", "severity"
+  ]
+}

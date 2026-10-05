@@ -20,8 +20,8 @@ def main() -> None:
     )
     payload.update({
         "package": "Beyond SEO",
-        "version": "1.3.0",
-        "release": "reusable audit runtime, Microsoft Clarity behavior evidence, provenance, comparison, and report QA",
+        "version": json.loads((ROOT / "core/evidence-schema.json").read_text(encoding="utf-8"))["schema_version"],
+        "release": "traceable findings, sample scoring and coverage, first-party quality, reproducibility and outcome tracking",
         "root_folder": "beyond-seo",
         "actual_files_count": len(files) + 1,
         "ai_friendly_seo": True,

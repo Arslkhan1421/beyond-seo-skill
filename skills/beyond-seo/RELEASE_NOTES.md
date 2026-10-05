@@ -1,3 +1,18 @@
+# Beyond SEO 1.4.0 Evidence and Measurement Reliability
+
+- Shared evidence schema and package validator enforce consistent labels and routed references.
+- URL-level evidence IDs, timestamps, parsed observation artifacts and finding acceptance contracts.
+- Transparent weighted sample-check rubric, business priority configuration and explicit crawl/check coverage; no overall SEO score from a partial crawler.
+- Context review for short text, canonicals, duplicates and sitemap omissions; header/meta noindex observations and preserved URL variants.
+- Missing/failed sitemap traversal, crawl limits, robots availability and unrendered JavaScript are disclosed.
+- Normalized GSC/GA4 quality validation, compatible-window checks and source-specific conversion safeguards.
+- Sanitized configuration, artifact/source checksums and dependency versions; existing audit directories are not overwritten.
+- History requires per-URL rechecks before resolution and flags incompatible scopes.
+- Current official-guidance register, traffic-drop diagnosis and implementation/outcome tracking.
+- Regression fixtures and CI validate package and runtime behavior.
+
+Breaking/behavior changes: schema is 1.4.0. Legacy missing findings become Not rechecked unless check evidence exists. Overall score is unavailable; sample diagnostic is scoped. Review signals no longer receive automatic corrective changes. First-party imports require explicit metadata and normalized numeric units.
+
 # Beyond SEO 1.3.0 Reusable Audit Runtime
 
 This release adds:

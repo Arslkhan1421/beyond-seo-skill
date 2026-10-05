@@ -4,6 +4,8 @@ Use this module when the user asks for a client-ready PDF, monthly report, propo
 
 ## Required Inputs
 
+Non-demonstration reports require finding contracts and matching `evidence_records`; the builder validates them before PDF generation. Read `core/finding-contract.md` and `core/scoring-methodology.md`. Keyword volume/difficulty must match ledger values for the keyword scope. Legacy payloads must be normalized to the current contract rather than disabling verification. `--sample` visibly labels its synthetic demonstration data.
+
 - Website URL, brand name, target market, services, and business goal.
 - Crawl findings, SERP samples, keyword tables, competitor rows, issue log, and roadmap.
 - Verified exports when available: GSC, GA4, Microsoft Clarity, Semrush, Ahrefs, Moz, DataForSEO, Screaming Frog, Sitebulb.

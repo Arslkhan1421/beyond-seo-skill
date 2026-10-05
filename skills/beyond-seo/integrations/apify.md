@@ -132,7 +132,7 @@ Use these labels:
 ```text
 Confirmed
 Directional
-Estimated
+Directional
 Not verified
 ```
 
@@ -157,7 +157,7 @@ An actor has low rating, few users, or unclear methodology.
 The output conflicts with official exports.
 ```
 
-### Use Not Verified When
+### Use Not verified When
 
 ```text
 No actor was run.

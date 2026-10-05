@@ -139,7 +139,7 @@ class ComparisonTests(unittest.TestCase):
         result = compare(previous, current)
         self.assertEqual(result["summary"]["New"], 1)
         self.assertEqual(result["summary"]["Improved"], 1)
-        self.assertEqual(result["summary"]["Resolved"], 1)
+        self.assertEqual(result["summary"]["Not rechecked"], 1)
 
     def test_worsening_severity_is_not_improvement(self):
         result = compare(

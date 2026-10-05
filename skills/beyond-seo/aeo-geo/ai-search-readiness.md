@@ -127,7 +127,7 @@ Verified Mention
 Verified Citation
 Competitor Mention
 Source Gap
-Not Verified
+Not verified
 Readiness Only
 ```
 
