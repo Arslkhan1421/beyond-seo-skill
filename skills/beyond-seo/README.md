@@ -1,6 +1,6 @@
 ## Apify-First Release Note
 
-Beyond SEO 1.0.2 uses Apify as the primary data layer. The skill should ask for only `APIFY_API_TOKEN` by default, then use Apify actors for crawling, SERP, competitors, Maps/local, reviews, Trends, PageSpeed/Lighthouse, GSC/GA4-style connector or export workflows, and backlink/authority checks where available.
+Beyond SEO 1.3.0 uses an evidence-led reusable audit runtime with Apify as the primary optional intelligence layer. It asks for only `APIFY_API_TOKEN` by default, can optionally import authenticated Microsoft Clarity behavior evidence, records provenance, qualifies realistic competitors, compares dated audits, supports an explicit opt-in local Lighthouse fallback for trusted targets, and validates report PDFs.
 
 Other APIs should not be requested up front. They are only optional later if Apify cannot fetch the needed data or if a private authenticated account/export is required.
 
@@ -45,6 +45,7 @@ It should be able to:
 - suggest safe free and paid backlink strategies;
 - audit local SEO and Google Business Profile opportunities;
 - evaluate AEO/GEO readiness for answer engines and AI search;
+- analyze verified Microsoft Clarity engagement and friction signals without treating them as ranking evidence;
 - create client-ready reports and developer briefs.
 
 ---
@@ -301,6 +302,7 @@ Beyond SEO reports can now include:
 - competitor keyword tables that separate verified ranking keywords from inferred targeted keywords;
 - support for Semrush, Ahrefs, Moz, DataForSEO, SE Ranking, Sistrix, Bing Webmaster Tools, Google Search Console, Google Trends, Google Ads Keyword Planner, Apify SERP samples, and manual SERP checks;
 - written website improvement blocks for the top recommendations.
+- first-party Microsoft Clarity behavior tables and investigation actions when a dated API/export source exists.
 
 The report must not invent tool data. If Semrush, Ahrefs, GSC, DataForSEO, or another source is not available, the report must say `Not verified` and recommend the exact export or access needed.
 

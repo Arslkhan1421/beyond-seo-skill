@@ -1,0 +1,7 @@
+interface:
+  display_name: "Beyond SEO"
+  short_description: "Evidence-led SEO, Clarity insights, and growth plans"
+  brand_color: "#12343B"
+  default_prompt: "Use $beyond-seo to run an evidence-led full-depth audit, include Microsoft Clarity behavior insights when verified, and create client-ready deliverables."
+policy:
+  allow_implicit_invocation: true

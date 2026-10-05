@@ -4,6 +4,12 @@ Use this file whenever the user asks for a report, client audit, SEO dashboard, 
 
 The goal is to make Beyond SEO reports easier to understand while keeping every score evidence-based.
 
+For PDF output, also load:
+
+```text
+reporting/pdf-report-design-system.md
+```
+
 ---
 
 ## 1. Required Visual Score Elements
@@ -252,6 +258,7 @@ Why is the score justified?
 Which keywords are verified?
 Which competitor keywords are verified vs inferred?
 What exact website text/technical/content improvements should be made?
+What Microsoft Clarity behavior signals are verified, over which 1–3 day window, and what should be investigated?
 What data is missing?
 What should be done first?
 ```

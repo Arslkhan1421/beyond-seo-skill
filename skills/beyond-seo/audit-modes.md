@@ -57,6 +57,7 @@ Apify token or advanced crawler
 Native browser/search/scraping
 GSC export/access
 GA4 export/access
+Microsoft Clarity token/export when behavior evidence is relevant
 GBP export/access if local
 Ahrefs/Semrush/Moz export or authority data
 Ability to process CSV/PDF/JSON files
@@ -71,6 +72,7 @@ Crawlability and indexability review
 Keyword ranking and opportunity review
 GSC query/page performance analysis
 GA4 conversion/landing page analysis
+Microsoft Clarity behavior/friction analysis
 Competitor SERP and content gap analysis
 Local SEO and map pack analysis
 Backlink/authority gap analysis
@@ -178,6 +180,7 @@ Do not say “official Ahrefs data” unless the data came from an official expo
 Actual GSC queries
 Actual organic clicks/impressions
 Actual GA4 conversions
+Microsoft Clarity behavior signals unless an authenticated or dated export is supplied
 Actual GBP calls/directions
 Official Ahrefs/Semrush/Moz backlink counts
 CRM lead quality
@@ -291,6 +294,7 @@ Use this mode when live tools are unavailable, but the user provides:
 SEO PDF reports
 GSC exports
 GA4 exports
+Microsoft Clarity JSON/CSV exports
 Screaming Frog exports
 Sitebulb exports
 Ahrefs exports
@@ -537,6 +541,7 @@ Technical audit
 Keyword audit
 GSC opportunity report
 GA4 conversion report
+Microsoft Clarity behavior report
 Competitor gap
 Backlink gap
 Local SEO audit

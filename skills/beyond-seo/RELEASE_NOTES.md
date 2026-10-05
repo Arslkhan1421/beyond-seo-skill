@@ -1,3 +1,18 @@
+# Beyond SEO 1.3.0 Reusable Audit Runtime
+
+This release adds:
+
+- reusable configuration-driven crawl and SERP audit runner;
+- machine-readable JSON/CSV evidence ledger with proprietary-metric safeguards;
+- realistic competitor classifier that separates comparable, content, and excluded domains;
+- dated audit comparison with New, Improved, Worsened, Changed, Unchanged, Resolved, and Reopened states;
+- PageSpeed collection with an explicit opt-in local Lighthouse fallback for trusted targets and plain-language failures;
+- automatic, fail-closed PDF builder QA for blank pages, broken bars, and replacement characters;
+- optional Microsoft Clarity Data Export API integration with dated JSON/CSV validation, evidence-safe behavior metrics, privacy gates, source classification, import template, and PDF reporting;
+- concise skill router, agent metadata, configuration template, fixtures, and automated tests.
+
+Older release history follows.
+
 # Beyond SEO 1.0.5 Visual Scorecards and Keyword Evidence Update
 
 Added client-reporting improvements:

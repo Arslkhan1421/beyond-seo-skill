@@ -1,0 +1,17 @@
+{
+  "audit_date": "2026-06-01T00:00:00+00:00",
+  "findings": [
+    {
+      "id": "missing-h1",
+      "finding": "Pages missing an H1",
+      "severity": "High",
+      "evidence": ["https://example.com/work"]
+    },
+    {
+      "id": "old-redirect",
+      "finding": "Legacy redirect missing",
+      "severity": "Medium",
+      "evidence": ["https://example.com/old"]
+    }
+  ]
+}
