@@ -7,6 +7,7 @@ import argparse
 import csv
 import hashlib
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -33,6 +34,83 @@ VERIFIED_LABELS = {
     "Confirmed", "First-party verified", "Paid-tool verified",
     "Screenshot verified", "Technical crawl verified",
 }
+ALLOWED_PROVENANCE = {
+    "Confirmed": {"direct_observation", "deterministic_calculation"},
+    "First-party verified": {"authenticated_api", "owner_export"},
+    "Paid-tool verified": {"authenticated_api", "owner_export"},
+    "Screenshot verified": {"dated_screenshot"},
+    "Technical crawl verified": {"trusted_crawler", "owner_export"},
+}
+METRIC_LABELS = {
+    "keyword_volume": {"Paid-tool verified"},
+    "keyword_difficulty": {"Paid-tool verified"},
+    "dr": {"Paid-tool verified"},
+    "da": {"Paid-tool verified"},
+    "authority_score": {"Paid-tool verified"},
+    "backlinks": {"Paid-tool verified"},
+    "referring_domains": {"Paid-tool verified"},
+    "traffic": {"First-party verified", "Paid-tool verified"},
+    "conversions": {"First-party verified"},
+    "ai_visibility": {"First-party verified", "Paid-tool verified"},
+}
+METRIC_ALIASES = {
+    "volume": "keyword_volume",
+    "search_volume": "keyword_volume",
+    "keywordvolume": "keyword_volume",
+    "difficulty": "keyword_difficulty",
+    "kd": "keyword_difficulty",
+    "domain_rating": "dr",
+    "domain_authority": "da",
+    "linking_domains": "referring_domains",
+    "inbound_links": "backlinks",
+    "key_events": "conversions",
+    "goals": "conversions",
+}
+METRIC_SOURCE_TYPES = {
+    "keyword_volume": {"paid_tool", "seo_tool", "rank_tracker"},
+    "keyword_difficulty": {"paid_tool", "seo_tool", "rank_tracker"},
+    "dr": {"paid_tool", "seo_tool", "backlink_tool"},
+    "da": {"paid_tool", "seo_tool", "backlink_tool"},
+    "authority_score": {"paid_tool", "seo_tool", "backlink_tool"},
+    "backlinks": {"paid_tool", "seo_tool", "backlink_tool"},
+    "referring_domains": {"paid_tool", "seo_tool", "backlink_tool"},
+    "traffic": {
+        "first_party", "first_party_analytics", "analytics", "search_console",
+        "paid_tool", "seo_tool",
+    },
+    "conversions": {
+        "first_party", "first_party_analytics", "analytics", "crm",
+        "search_console", "behavior_analytics",
+    },
+    "ai_visibility": {"first_party", "search_console", "paid_tool", "seo_tool"},
+}
+
+
+def canonical_metric(value: Any) -> str:
+    metric = re.sub(r"[^a-z0-9]+", "_", str(value).strip().lower()).strip("_")
+    metric = METRIC_ALIASES.get(metric, metric)
+    tokens = set(metric.split("_"))
+    if "volume" in tokens and ({"keyword", "search"} & tokens):
+        return "keyword_volume"
+    if "difficulty" in tokens and "keyword" in tokens:
+        return "keyword_difficulty"
+    if "da" in tokens or {"domain", "authority"}.issubset(tokens):
+        return "da"
+    if "dr" in tokens or {"domain", "rating"}.issubset(tokens):
+        return "dr"
+    if {"authority", "score"}.issubset(tokens):
+        return "authority_score"
+    if {"ai", "visibility"}.issubset(tokens):
+        return "ai_visibility"
+    if "traffic" in tokens:
+        return "traffic"
+    if "conversion" in tokens or "conversions" in tokens:
+        return "conversions"
+    if "backlink" in tokens or "backlinks" in tokens:
+        return "backlinks"
+    if "referring" in tokens and ({"domain", "domains"} & tokens):
+        return "referring_domains"
+    return metric
 
 
 def utc_now() -> str:
@@ -41,7 +119,7 @@ def utc_now() -> str:
 
 def stable_id(record: dict[str, Any]) -> str:
     material = "|".join(str(record.get(key, "")) for key in (
-        "source_name", "source_url", "scope", "metric", "value"
+        "source_name", "source_url", "provenance", "scope", "metric", "value"
     ))
     return hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
 
@@ -55,6 +133,7 @@ def normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         "source_url": record.get("source_url", ""),
         "actor_id": record.get("actor_id", ""),
         "method": record.get("method", ""),
+        "provenance": record.get("provenance", "unknown"),
         "scope": record.get("scope", ""),
         "metric": record.get("metric", ""),
         "value": record.get("value"),
@@ -64,11 +143,27 @@ def normalize_record(record: dict[str, Any]) -> dict[str, Any]:
     }
     if output["label"] not in ALLOWED_LABELS:
         raise ValueError(f"Unsupported evidence label: {output['label']}")
-    metric = str(output["metric"]).strip().lower().replace(" ", "_")
+    required_provenance = ALLOWED_PROVENANCE.get(output["label"])
+    if required_provenance and output["provenance"] not in required_provenance:
+        raise ValueError(
+            f"Evidence label '{output['label']}' requires provenance in "
+            f"{sorted(required_provenance)}; received {output['provenance']!r}."
+        )
+    metric = canonical_metric(output["metric"])
     if metric in RESTRICTED_METRICS and output["value"] not in (None, "", "Not verified"):
-        if output["label"] not in VERIFIED_LABELS:
+        supported_labels = METRIC_LABELS.get(metric, VERIFIED_LABELS)
+        if output["label"] not in supported_labels:
             raise ValueError(
-                f"Metric '{metric}' requires verified evidence; received {output['label']}."
+                f"Metric '{metric}' requires one of {sorted(supported_labels)}; received {output['label']}."
+            )
+        source_type = re.sub(
+            r"[^a-z0-9]+", "_", str(output["source_type"]).strip().lower()
+        ).strip("_")
+        supported_source_types = METRIC_SOURCE_TYPES.get(metric, set())
+        if source_type not in supported_source_types:
+            raise ValueError(
+                f"Metric '{metric}' with label '{output['label']}' requires source_type in "
+                f"{sorted(supported_source_types)}; received {source_type!r}."
             )
     return output
 

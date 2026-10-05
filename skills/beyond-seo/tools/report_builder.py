@@ -474,21 +474,39 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
     doc.build(story, onFirstPage=cover_band, onLaterPages=footer)
 
 
+def build_and_validate_pdf(
+    payload: dict[str, Any],
+    output: Path,
+    qa_output: Path | None = None,
+) -> dict[str, Any]:
+    from pdf_qa import inspect_pdf
+
+    build_pdf(payload, output)
+    qa_path = qa_output or output.with_suffix(".qa.json")
+    result = inspect_pdf(output, qa_path)
+    if not result["passed"]:
+        raise RuntimeError(f"PDF failed structural QA; see {qa_path}.")
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Build a Beyond SEO PDF report.")
     parser.add_argument("--input", help="Normalized report JSON path.")
     parser.add_argument("--output", required=True, help="Output PDF path.")
     parser.add_argument("--sample", action="store_true", help="Generate a sample report.")
-    parser.add_argument("--qa", action="store_true", help="Run structural PDF quality checks after generation.")
+    parser.add_argument(
+        "--qa",
+        action="store_true",
+        help="Compatibility flag; structural PDF QA is always enforced.",
+    )
     args = parser.parse_args()
     payload = load_payload(args.input, args.sample)
-    build_pdf(payload, Path(args.output))
-    if args.qa:
-        from pdf_qa import inspect_pdf
-        result = inspect_pdf(Path(args.output), Path(args.output).with_suffix(".qa.json"))
-        if not result["passed"]:
-            raise SystemExit("PDF generated but failed quality checks. See the .qa.json artifact.")
-    print(Path(args.output).resolve())
+    output = Path(args.output)
+    try:
+        build_and_validate_pdf(payload, output)
+    except RuntimeError as exc:
+        raise SystemExit(str(exc)) from exc
+    print(output.resolve())
 
 
 if __name__ == "__main__":

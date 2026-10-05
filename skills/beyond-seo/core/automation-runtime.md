@@ -24,6 +24,9 @@ The runner creates:
 - `audit-comparison.json` when a previous audit is supplied
 - `report-input.json`
 - `beyond-seo-audit.pdf`
+- `beyond-seo-audit.qa.json`
+
+Historical findings use `New`, `Improved`, `Worsened`, `Changed`, `Unchanged`, `Resolved`, and `Reopened`. A lower known severity is improved; a higher known severity is worsened; unrecognized severity changes are changed rather than guessed.
 
 ## Quality gates
 
@@ -31,14 +34,18 @@ Before delivery:
 
 1. Confirm the ledger contains no token or secret.
 2. Confirm proprietary metrics are absent unless backed by first-party or paid-tool evidence.
-3. Run `python tools/pdf_qa.py --input report.pdf --output report.qa.json`.
-4. Review the rendered PDF visually when rendering tools exist.
+3. Confirm `beyond-seo-audit.qa.json` reports a passing structural check. The runner creates it automatically and stops when QA fails.
+4. Review the rendered PDF visually when rendering tools exist; structural QA does not replace visual review.
 5. Review excluded competitors and restore one only when it is a realistic business benchmark.
 6. Keep the raw SERP sample date, country, language, device, and depth in the report.
 
+## Crawl boundary
+
+The crawler respects `robots.txt` by default, rejects credentialed and non-HTTP URLs, pins each request to the validated DNS address, limits redirects and response size, and blocks private/non-public addresses. Same-site crawling is the default. Add external sitemap hosts explicitly with `allowed_sitemap_hosts`; set `allow_private_network` to `true` only for an intentional, trusted internal audit target.
+
 ## Performance fallback
 
-`tools/lighthouse_runner.py` tries PageSpeed Insights first and then a locally installed Lighthouse command. If neither succeeds, it writes `Not verified` with plain-language context. It must never convert an unavailable performance test into a numeric score.
+`tools/lighthouse_runner.py` tries PageSpeed Insights first. A locally installed Lighthouse command is available only when `performance.allow_local_lighthouse` is explicitly `true` for a trusted target; the local browser is disabled by default because it can reach network locations from the runner host. If no allowed method succeeds, the tool writes `Not verified` with plain-language context. It must never convert an unavailable performance test into a numeric score.
 
 ## Scheduling boundary
 

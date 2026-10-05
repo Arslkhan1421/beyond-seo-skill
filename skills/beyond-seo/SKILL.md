@@ -21,7 +21,7 @@ Beyond SEO is an evidence-led SEO operating system. Connect every recommendation
 6. Treat Apify community actors as Directional unless independently verified.
 7. Exclude directories, social platforms, marketplaces, and giant ecosystems from the comparable business competitor set unless the user explicitly requests them.
 8. Never store or repeat API tokens in skill files, logs, reports, templates, or final responses.
-9. Render-check PDFs before delivery when rendering tools are available.
+9. Run structural PDF QA before delivery and visually inspect rendered pages when rendering tools are available.
 10. Explain unavailable tools plainly; do not expose raw rate-limit codes as client-facing findings.
 
 ## Evidence labels
@@ -39,7 +39,7 @@ Use only these labels:
 - `Directional`: useful estimate or third-party/community actor signal requiring confirmation.
 - `Not verified`: unavailable or unsupported.
 
-For machine-readable provenance, use `tools/evidence_ledger.py`. It rejects restricted numeric metrics when the evidence label cannot support them.
+For machine-readable provenance, use `tools/evidence_ledger.py`. Restricted numeric metrics require a compatible evidence label, explicit provenance, and a matching `source_type` such as `first_party` or `paid_tool`.
 
 ## Start sequence
 
@@ -76,7 +76,7 @@ Use browser/search/crawl tools when Apify is missing or unsuitable. Follow `inte
 
 ### File analysis
 
-Use uploaded CSV, JSON, XLSX, PDF, or crawler exports. Run `tools/source_classifier.py`; for Screaming Frog, Sitebulb, Lumar, or JetOctopus also read `integrations/technical-crawl-imports.md`.
+Use uploaded CSV, JSON, XLSX, PDF, or crawler exports. Run `tools/source_classifier.py` with an explicit `--provenance` value; filename/header detection alone never grants verified status. For Screaming Frog, Sitebulb, Lumar, or JetOctopus also read `integrations/technical-crawl-imports.md`.
 
 ### Advisory
 
@@ -99,7 +99,7 @@ python tools/audit_runner.py --config audit-config.json --output-dir output/site
 python tools/audit_runner.py --config audit-config.json --output-dir output/current --previous output/previous/audit-data.json
 ```
 
-The runner creates crawl data, a rank baseline, qualified/excluded competitors, performance results, findings, an evidence ledger, comparison data, report input, and a PDF. Read `core/automation-runtime.md` for artifacts and quality gates.
+The runner creates crawl data, a rank baseline, qualified/excluded competitors, performance results, findings, an evidence ledger, comparison data, report input, a PDF, and a structural PDF-QA artifact. Read `core/automation-runtime.md` for artifacts and quality gates.
 
 If a different runtime is required, preserve the same output schema and evidence rules.
 
@@ -150,7 +150,7 @@ Show excluded domains and reasons internally. Do not silently treat Reddit, Face
 
 A one-time SERP sample is a baseline, not ranking history. Record keyword, country, language, device, date/time, observed depth, position, URL, SERP features, source, and label. Use `Not visible within sampled top N`; never translate that to a fabricated position.
 
-For recurring audits, preserve each dated `audit-data.json` and run `tools/audit_compare.py`. Report findings as New, Improved, Changed, Unchanged, Resolved, or Reopened.
+For recurring audits, preserve each dated `audit-data.json` and run `tools/audit_compare.py`. Report findings as New, Improved, Worsened, Changed, Unchanged, Resolved, or Reopened.
 
 ## Performance
 
@@ -160,7 +160,7 @@ Field Lighthouse data and lab Lighthouse data are different. Keep CrUX field evi
 
 ## Microsoft Clarity
 
-Treat Clarity as first-party behavior evidence, not ranking evidence. The Data Export API covers only the previous 1–3 days, up to three dimensions, 1,000 rows without pagination, and 10 requests per project per day. Record the UTC retrieval time and window.
+Treat Clarity as first-party behavior evidence, not ranking evidence. The Data Export API covers only the previous 1–3 days, up to three dimensions, 1,000 rows without pagination, and 10 requests per project per day. Saved JSON/CSV imports must be owner-supplied and dated; the runtime re-sanitizes raw data and rebuilds report sections. Record the UTC retrieval time and window.
 
 Add verified Clarity metrics and page-level friction signals to the PDF under **Microsoft Clarity Behavior Insights**. Do not infer causation, monthly trends, conversions, or SEO scores from short-window signals. Keep recordings, identifiers, and personal data out of reports. Verify consent and masking before recommending broader collection.
 
@@ -193,7 +193,7 @@ Report requirements:
 - no copied proprietary logos or exact UI replicas;
 - no broken text score bars, unexplained rate-limit codes, clipped tables, or accidental blank pages.
 
-Use `tools/pdf_qa.py` and visually inspect rendered pages before delivery.
+The runner and `report_builder.py` call `tools/pdf_qa.py` automatically and fail closed when structural QA fails; `--qa` remains accepted for command compatibility. Visually inspect rendered pages before delivery when rendering tools are available.
 
 ## Social mode
 

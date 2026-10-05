@@ -36,7 +36,7 @@ notes
 2. Load prior tracking CSV/JSON if provided.
 3. Collect fresh rank evidence from available sources.
 4. Compare only like-for-like location/device/source where possible.
-5. Label movement as improved, declined, unchanged, new, lost, or not comparable.
+5. Label keyword movement as improved, declined, unchanged, new, lost, or not comparable. For audit findings, use `Improved` only when known severity decreases and `Worsened` when it increases.
 6. Flag cannibalization when multiple target URLs appear for the same query.
 7. Recommend actions for keywords in positions 4-20 before chasing brand-new terms.
 

@@ -46,13 +46,16 @@ def qualify(row: dict, context: dict) -> dict:
     appearances = int(row.get("serp_appearances") or 1)
     position = int(row.get("observed_position") or row.get("position") or 100)
     score = min(30, overlap * 15) + min(25, appearances * 5) + (25 if position <= 3 else 15 if position <= 10 else 0)
-    if row.get("business_model_match", True):
+    business_model_match = row.get("business_model_match")
+    if business_model_match is True:
         score += 20
     if excluded:
         score = 0
     classification = "Comparable" if score >= 45 and not excluded else "Content competitor" if score >= 25 and not excluded else "Excluded"
     if not reasons:
         reasons.append(f"service overlap={overlap}; sampled position={position}")
+        if business_model_match is not True:
+            reasons.append("business model match not verified")
     return {**row, "domain": domain, "qualification_score": score, "classification": classification, "qualification_reason": "; ".join(reasons)}
 
 

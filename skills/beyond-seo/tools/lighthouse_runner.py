@@ -46,10 +46,10 @@ def run_pagespeed(url: str, strategy: str, api_key: str | None = None, timeout: 
         if response.status_code == 200:
             return summarize_lighthouse(response.json(), "PageSpeed Insights", strategy), ""
         if response.status_code == 429:
-            return None, "PageSpeed request limit reached; a local Lighthouse fallback was attempted."
-        return None, f"PageSpeed did not return a usable result ({response.status_code}); a local fallback was attempted."
+            return None, "PageSpeed request limit reached."
+        return None, f"PageSpeed did not return a usable result ({response.status_code})."
     except requests.RequestException:
-        return None, "PageSpeed was unavailable; a local Lighthouse fallback was attempted."
+        return None, "PageSpeed was unavailable."
 
 
 def find_lighthouse() -> list[str] | None:
@@ -69,7 +69,7 @@ def run_local(url: str, strategy: str, output_dir: Path, timeout: int = 150) -> 
     output_dir.mkdir(parents=True, exist_ok=True)
     output = output_dir / f"lighthouse-{strategy}.json"
     form_factor = "mobile" if strategy == "mobile" else "desktop"
-    args = command + [url, "--quiet", "--output=json", f"--output-path={output}", "--chrome-flags=--headless --no-sandbox", f"--form-factor={form_factor}"]
+    args = command + [url, "--quiet", "--output=json", f"--output-path={output}", "--chrome-flags=--headless", f"--form-factor={form_factor}"]
     try:
         subprocess.run(args, check=True, capture_output=True, text=True, timeout=timeout)
         return summarize_lighthouse(json.loads(output.read_text(encoding="utf-8")), "Local Lighthouse", strategy)
@@ -77,11 +77,17 @@ def run_local(url: str, strategy: str, output_dir: Path, timeout: int = 150) -> 
         return None
 
 
-def collect(url: str, strategy: str, output_dir: Path, api_key: str | None = None) -> dict:
+def collect(
+    url: str,
+    strategy: str,
+    output_dir: Path,
+    api_key: str | None = None,
+    allow_local_lighthouse: bool = False,
+) -> dict:
     result, note = run_pagespeed(url, strategy, api_key)
     if result:
         return result
-    local = run_local(url, strategy, output_dir)
+    local = run_local(url, strategy, output_dir) if allow_local_lighthouse is True else None
     if local:
         local["note"] = note
         return local
@@ -92,7 +98,11 @@ def collect(url: str, strategy: str, output_dir: Path, api_key: str | None = Non
         "scores": {},
         "metrics": {},
         "evidence_label": "Not verified",
-        "note": note + " Local Lighthouse was not installed or did not complete.",
+        "note": note + (
+            " Local Lighthouse was not installed or did not complete."
+            if allow_local_lighthouse is True
+            else " Local Lighthouse is disabled unless explicitly enabled for a trusted target."
+        ),
     }
 
 
@@ -101,10 +111,24 @@ def main() -> None:
     parser.add_argument("--url", required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--strategy", choices=("mobile", "desktop", "both"), default="both")
+    parser.add_argument(
+        "--allow-local-lighthouse",
+        action="store_true",
+        help="Allow a local browser to visit the supplied URL. Use only for a trusted target.",
+    )
     args = parser.parse_args()
     strategies = ("mobile", "desktop") if args.strategy == "both" else (args.strategy,)
     output = Path(args.output)
-    results = [collect(args.url, strategy, output.parent, os.getenv("PAGESPEED_API_KEY")) for strategy in strategies]
+    results = [
+        collect(
+            args.url,
+            strategy,
+            output.parent,
+            os.getenv("PAGESPEED_API_KEY"),
+            args.allow_local_lighthouse,
+        )
+        for strategy in strategies
+    ]
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(json.dumps({"output": str(output.resolve()), "results": len(results)}))

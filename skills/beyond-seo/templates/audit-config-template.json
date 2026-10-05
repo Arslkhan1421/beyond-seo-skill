@@ -18,6 +18,9 @@
     "secondary service agency usa"
   ],
   "seed_urls": [],
+  "respect_robots_txt": true,
+  "allowed_sitemap_hosts": [],
+  "allow_private_network": false,
   "max_crawl_pages": 100,
   "crawl_delay_seconds": 0.1,
   "max_serp_queries": 20,
@@ -27,7 +30,8 @@
     "credit_safe": true
   },
   "performance": {
-    "enabled": true
+    "enabled": true,
+    "allow_local_lighthouse": false
   },
   "clarity": {
     "enabled": true,

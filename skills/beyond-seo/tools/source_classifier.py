@@ -22,6 +22,25 @@ FIRST_PARTY = {
 }
 PAID_TOOLS = {"semrush", "ahrefs", "moz", "dataforseo", "sistrix", "se ranking", "majestic"}
 CRAWL_TOOLS = {"screaming frog", "sitebulb", "lumar", "jetoctopus", "crawl"}
+PROVENANCE_LEVELS = {
+    "authenticated_api": "authenticated API response",
+    "owner_export": "owner-supplied export",
+    "trusted_crawler": "recognized crawler export",
+    "dated_screenshot": "dated screenshot",
+    "live_observation": "live observation",
+}
+ALLOWED_METRICS_BY_LEVEL = {
+    "Confirmed": {"rank", "url"},
+    "First-party verified": {"rank", "url", "traffic", "conversions", "behavior"},
+    "Paid-tool verified": {"volume", "difficulty", "rank", "url", "traffic", "authority", "backlinks"},
+    "Screenshot verified": {"rank", "url"},
+    "Technical crawl verified": {"url"},
+    "Live SERP sample": {"rank", "url"},
+    "Live search sample": {"rank", "url"},
+    "Inferred": {"url"},
+    "Directional": {"url"},
+    "Not verified": {"url"},
+}
 
 
 def norm(value: str) -> str:
@@ -49,20 +68,20 @@ def detect_source(path: Path, headers: Iterable[str], explicit: str | None) -> s
     return "unknown"
 
 
-def evidence_level(source: str) -> str:
+def evidence_level(source: str, provenance: str | None = None) -> str:
     source = norm(source)
-    if source in FIRST_PARTY:
+    if source in FIRST_PARTY and provenance in {"authenticated_api", "owner_export"}:
         return "First-party verified"
-    if source in PAID_TOOLS:
+    if source in PAID_TOOLS and provenance in {"authenticated_api", "owner_export"}:
         return "Paid-tool verified"
-    if source in CRAWL_TOOLS:
+    if source in CRAWL_TOOLS and provenance in {"trusted_crawler", "owner_export"}:
         return "Technical crawl verified"
-    if "screenshot" in source:
+    if "screenshot" in source and provenance == "dated_screenshot":
         return "Screenshot verified"
-    if "manual serp" in source or "serp sample" in source:
+    if ("manual serp" in source or "serp sample" in source) and provenance == "live_observation":
         return "Live SERP sample"
     if "competitor" in source or "page review" in source:
-        return "Inferred from competitor page"
+        return "Inferred"
     return "Not verified"
 
 
@@ -80,13 +99,14 @@ def metric_confidence(row: dict[str, str], level: str) -> tuple[str, str]:
         "backlinks": ["backlinks", "referring domains", "linking domains", "inbound links"],
         "conversions": ["conversions", "key events", "goals"],
     }
+    allowed = ALLOWED_METRICS_BY_LEVEL.get(level, {"url"})
     for metric, names in metric_map.items():
         value = ""
         for name in names:
             if name in headers:
                 value = str(headers.get(name) or "").strip()
                 break
-        if value and value.lower() not in {"not verified", "n/a", "na", "-"}:
+        if value and value.lower() not in {"not verified", "n/a", "na", "-"} and metric in allowed:
             verified.append(metric)
         else:
             missing.append(metric)
@@ -95,26 +115,23 @@ def metric_confidence(row: dict[str, str], level: str) -> tuple[str, str]:
         observed_value = str(headers.get("observed value") or "").strip()
         if metric_name and observed_value:
             verified.append("behavior")
-    if level in {"Not verified", "Inferred from competitor page", "Live SERP sample"}:
-        restricted = {"volume", "difficulty", "traffic", "authority", "backlinks", "conversions"}
-        verified = [m for m in verified if m not in restricted]
-        missing = sorted(set(missing).union(restricted))
     return ", ".join(sorted(set(verified))) or "none", ", ".join(sorted(set(missing))) or "none"
 
 
-def classify(input_path: Path, source: str | None) -> tuple[list[dict[str, str]], dict[str, object]]:
+def classify(input_path: Path, source: str | None, provenance: str | None = None) -> tuple[list[dict[str, str]], dict[str, object]]:
     with input_path.open("r", encoding="utf-8-sig", newline="") as handle:
         reader = csv.DictReader(handle)
         rows = list(reader)
         headers = reader.fieldnames or []
     detected = detect_source(input_path, headers, source)
-    level = evidence_level(detected)
+    level = evidence_level(detected, provenance)
     output_rows = []
     counts = Counter()
     for row in rows:
         verified, missing = metric_confidence(row, level)
         enriched = dict(row)
         enriched["detected_source"] = detected
+        enriched["provenance"] = provenance or "unknown"
         enriched["evidence_level"] = level
         enriched["verified_metrics"] = verified
         enriched["missing_metrics"] = missing
@@ -127,6 +144,7 @@ def classify(input_path: Path, source: str | None) -> tuple[list[dict[str, str]]
     summary = {
         "input": str(input_path),
         "detected_source": detected,
+        "provenance": provenance or "unknown",
         "evidence_level": level,
         "rows": len(rows),
         "levels": dict(counts),
@@ -137,7 +155,7 @@ def classify(input_path: Path, source: str | None) -> tuple[list[dict[str, str]]
 def write_csv(path: Path, rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = list(rows[0].keys()) if rows else [
-        "detected_source", "evidence_level", "verified_metrics", "missing_metrics", "confidence_note"
+        "detected_source", "provenance", "evidence_level", "verified_metrics", "missing_metrics", "confidence_note"
     ]
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
@@ -150,9 +168,14 @@ def main() -> None:
     parser.add_argument("--input", required=True, help="Input CSV path.")
     parser.add_argument("--output", help="Output classified CSV path.")
     parser.add_argument("--source", help="Explicit source name, e.g. Semrush, Ahrefs, GSC.")
+    parser.add_argument(
+        "--provenance",
+        choices=tuple(PROVENANCE_LEVELS),
+        help="How the file was acquired. Source detection alone never grants verified status.",
+    )
     parser.add_argument("--json", action="store_true", help="Print JSON summary.")
     args = parser.parse_args()
-    rows, summary = classify(Path(args.input), args.source)
+    rows, summary = classify(Path(args.input), args.source, args.provenance)
     if args.output:
         write_csv(Path(args.output), rows)
     if args.json or not args.output:

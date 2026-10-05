@@ -9,6 +9,23 @@ import json
 from pathlib import Path
 
 
+SEVERITY_RANK = {
+    "info": 0,
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "critical": 4,
+}
+
+
+def severity_change(previous: object, current: object) -> str | None:
+    old_rank = SEVERITY_RANK.get(str(previous or "").strip().lower())
+    new_rank = SEVERITY_RANK.get(str(current or "").strip().lower())
+    if old_rank is None or new_rank is None or old_rank == new_rank:
+        return None
+    return "Improved" if new_rank < old_rank else "Worsened"
+
+
 def finding_key(row: dict) -> str:
     if row.get("id"):
         return str(row["id"])
@@ -34,9 +51,11 @@ def compare(previous: dict, current: dict) -> dict:
             new_severity = new[key].get("severity") or new[key].get("priority")
             old_evidence = json.dumps(old[key].get("evidence", ""), sort_keys=True)
             new_evidence = json.dumps(new[key].get("evidence", ""), sort_keys=True)
-            state = "Improved" if new_severity != old_severity else "Changed" if new_evidence != old_evidence else "Unchanged"
+            state = severity_change(old_severity, new_severity)
+            if state is None:
+                state = "Changed" if new_severity != old_severity or new_evidence != old_evidence else "Unchanged"
             changes.append({"id": key, "status": state, "previous": old[key], "current": new[key]})
-    counts = {status: sum(1 for row in changes if row["status"] == status) for status in ("New", "Improved", "Changed", "Unchanged", "Resolved", "Reopened")}
+    counts = {status: sum(1 for row in changes if row["status"] == status) for status in ("New", "Improved", "Worsened", "Changed", "Unchanged", "Resolved", "Reopened")}
     return {"previous_date": previous.get("audit_date"), "current_date": current.get("audit_date"), "summary": counts, "changes": changes}
 
 

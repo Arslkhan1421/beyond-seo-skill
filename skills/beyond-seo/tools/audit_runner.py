@@ -5,54 +5,193 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import http.client
+import ipaddress
 import json
 import os
 import re
+import socket
+import ssl
 import time
 from collections import Counter, deque
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import urldefrag, urljoin, urlparse
+from urllib.parse import urldefrag, urljoin, urlparse, urlunparse
+from urllib.robotparser import RobotFileParser
 
 import requests
 from bs4 import BeautifulSoup
 
 from audit_compare import compare
 from clarity_export import collect as collect_clarity
-from clarity_export import normalize_export as normalize_clarity_export
+from clarity_export import load_saved_export as load_saved_clarity_export
 from competitor_classifier import classify
 from evidence_ledger import EvidenceLedger
 from lighthouse_runner import collect as collect_performance
-from report_builder import build_pdf
+from report_builder import build_and_validate_pdf
 
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Encoding": "identity",
 }
+MAX_RESPONSE_BYTES = 10_000_000
+MAX_REDIRECTS = 5
+REDIRECT_STATUSES = {301, 302, 303, 307, 308}
 
 
 def clean(value: str) -> str:
     return re.sub(r"\s+", " ", value or "").strip()
 
 
+def canonical_host(value: str) -> str:
+    return (value or "").lower().rstrip(".").removeprefix("www.")
+
+
 def normalize_url(url: str, host: str) -> str | None:
     url = urldefrag(url)[0]
     parsed = urlparse(url)
-    if parsed.scheme not in {"http", "https"} or parsed.netloc.lower().removeprefix("www.") != host:
+    if (
+        parsed.scheme not in {"http", "https"}
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or canonical_host(parsed.hostname) != canonical_host(host)
+    ):
         return None
     path = parsed.path or "/"
     if path != "/":
         path = path.rstrip("/")
-    return f"https://{host}{path}" + (f"?{parsed.query}" if parsed.query else "")
+    return parsed._replace(path=path, fragment="").geturl()
 
 
-def fetch(url: str, timeout: int = 25) -> dict:
+class PinnedHTTPConnection(http.client.HTTPConnection):
+    def __init__(self, host: str, port: int, connect_ip: str, timeout: int):
+        super().__init__(host, port=port, timeout=timeout)
+        self._connect_ip = connect_ip
+
+    def connect(self) -> None:
+        self.sock = self._create_connection(
+            (self._connect_ip, self.port),
+            self.timeout,
+            self.source_address,
+        )
+
+
+class PinnedHTTPSConnection(http.client.HTTPSConnection):
+    def __init__(self, host: str, port: int, connect_ip: str, timeout: int):
+        super().__init__(host, port=port, timeout=timeout, context=ssl.create_default_context())
+        self._connect_ip = connect_ip
+
+    def connect(self) -> None:
+        self.sock = self._create_connection(
+            (self._connect_ip, self.port),
+            self.timeout,
+            self.source_address,
+        )
+        self.sock = self._context.wrap_socket(self.sock, server_hostname=self.host)
+
+
+def resolve_network_target(
+    url: str,
+    allowed_hosts: set[str] | None = None,
+    allow_private_network: bool = False,
+) -> tuple[object, str]:
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Only HTTP and HTTPS URLs are allowed.")
+    if not parsed.hostname or parsed.username is not None or parsed.password is not None:
+        raise ValueError("URLs must include a hostname and must not contain credentials.")
+    host = canonical_host(parsed.hostname)
+    allowed = {canonical_host(item) for item in (allowed_hosts or set())}
+    if allowed and host not in allowed:
+        raise ValueError(f"Network target host is outside the approved audit scope: {host}")
     try:
-        response = requests.get(url, headers=HEADERS, timeout=timeout, allow_redirects=True)
-        return {"url": url, "status": response.status_code, "final_url": response.url, "headers": dict(response.headers), "text": response.text}
-    except requests.RequestException as exc:
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    except ValueError as exc:
+        raise ValueError("URL contains an invalid port.") from exc
+    try:
+        literal = ipaddress.ip_address(parsed.hostname.split("%", 1)[0])
+        addresses = {literal}
+    except ValueError:
+        try:
+            addresses = {
+                ipaddress.ip_address(item[4][0].split("%", 1)[0])
+                for item in socket.getaddrinfo(parsed.hostname, port, type=socket.SOCK_STREAM)
+            }
+        except (OSError, ValueError) as exc:
+            raise ValueError(f"Could not safely resolve network target: {host}") from exc
+    if not addresses:
+        raise ValueError(f"Could not safely resolve network target: {host}")
+    if not allow_private_network and any(not address.is_global for address in addresses):
+        raise ValueError(f"Private or non-public network target is not allowed: {host}")
+    selected = sorted(addresses, key=lambda address: (address.version, address.packed))[0]
+    return parsed, str(selected)
+
+
+def validate_network_url(
+    url: str,
+    allowed_hosts: set[str] | None = None,
+    allow_private_network: bool = False,
+) -> str:
+    resolve_network_target(url, allowed_hosts, allow_private_network)
+    return url
+
+
+def open_pinned_response(url: str, parsed: object, connect_ip: str, timeout: int):
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    connection_class = PinnedHTTPSConnection if parsed.scheme == "https" else PinnedHTTPConnection
+    connection = connection_class(parsed.hostname, port, connect_ip, timeout)
+    target = urlunparse(("", "", parsed.path or "/", parsed.params, parsed.query, ""))
+    connection.request("GET", target, headers=HEADERS)
+    return connection, connection.getresponse()
+
+
+def fetch(
+    url: str,
+    timeout: int = 25,
+    allowed_hosts: set[str] | None = None,
+    allow_private_network: bool = False,
+    max_bytes: int = MAX_RESPONSE_BYTES,
+) -> dict:
+    current = url
+    try:
+        for _ in range(MAX_REDIRECTS + 1):
+            parsed, connect_ip = resolve_network_target(current, allowed_hosts, allow_private_network)
+            connection, response = open_pinned_response(current, parsed, connect_ip, timeout)
+            try:
+                headers = requests.structures.CaseInsensitiveDict(response.getheaders())
+                if response.status in REDIRECT_STATUSES and headers.get("Location"):
+                    current = urljoin(current, headers["Location"])
+                    continue
+                content_length = headers.get("Content-Length")
+                if content_length and int(content_length) > max_bytes:
+                    raise ValueError(f"Response exceeded the {max_bytes}-byte audit limit.")
+                chunks: list[bytes] = []
+                received = 0
+                while True:
+                    chunk = response.read(65536)
+                    if not chunk:
+                        break
+                    received += len(chunk)
+                    if received > max_bytes:
+                        raise ValueError(f"Response exceeded the {max_bytes}-byte audit limit.")
+                    chunks.append(chunk)
+                text = b"".join(chunks).decode("utf-8", errors="replace")
+                return {
+                    "url": url,
+                    "status": response.status,
+                    "final_url": current,
+                    "headers": dict(headers),
+                    "text": text,
+                }
+            finally:
+                response.close()
+                connection.close()
+        raise ValueError(f"Response exceeded the {MAX_REDIRECTS}-redirect audit limit.")
+    except (OSError, http.client.HTTPException, ssl.SSLError, ValueError) as exc:
         return {"url": url, "status": None, "final_url": "", "headers": {}, "text": "", "error": str(exc)}
 
 
@@ -89,7 +228,14 @@ def parse_sitemap(text: str) -> list[str]:
     return [clean(item) for item in re.findall(r"<loc>\s*([^<]+)\s*</loc>", text or "", flags=re.I)]
 
 
-def collect_sitemap_urls(sitemap_url: str, host: str, max_sitemaps: int = 25) -> tuple[int | None, list[str]]:
+def collect_sitemap_urls(
+    sitemap_url: str,
+    host: str,
+    max_sitemaps: int = 25,
+    allowed_sitemap_hosts: set[str] | None = None,
+    allow_private_network: bool = False,
+) -> tuple[int | None, list[str]]:
+    allowed_hosts = {canonical_host(host), *(canonical_host(item) for item in (allowed_sitemap_hosts or set()))}
     queue = deque([sitemap_url])
     seen_sitemaps: set[str] = set()
     page_urls: set[str] = set()
@@ -99,11 +245,15 @@ def collect_sitemap_urls(sitemap_url: str, host: str, max_sitemaps: int = 25) ->
         if current in seen_sitemaps:
             continue
         seen_sitemaps.add(current)
-        result = fetch(current)
+        result = fetch(current, allowed_hosts=allowed_hosts, allow_private_network=allow_private_network)
         if root_status is None:
             root_status = result.get("status")
         for location in parse_sitemap(result.get("text", "")):
             if urlparse(location).path.lower().endswith(".xml"):
+                try:
+                    validate_network_url(location, allowed_hosts, allow_private_network)
+                except ValueError:
+                    continue
                 queue.append(location)
                 continue
             normalized = normalize_url(location, host)
@@ -114,26 +264,46 @@ def collect_sitemap_urls(sitemap_url: str, host: str, max_sitemaps: int = 25) ->
 
 def crawl(config: dict) -> tuple[list[dict], dict, dict]:
     start = config["website_url"].rstrip("/") + "/"
-    host = urlparse(start).netloc.lower().removeprefix("www.")
-    robots = fetch(urljoin(start, "/robots.txt"))
+    host = canonical_host(urlparse(start).hostname or "")
+    allow_private_network = config.get("allow_private_network", False) is True
+    site_hosts = {host}
+    sitemap_hosts = {canonical_host(item) for item in config.get("allowed_sitemap_hosts", [])}
+    robots = fetch(
+        urljoin(start, "/robots.txt"),
+        allowed_hosts=site_hosts,
+        allow_private_network=allow_private_network,
+    )
+    robots_parser = RobotFileParser()
+    robots_parser.set_url(robots.get("final_url") or urljoin(start, "/robots.txt"))
+    if robots.get("status") == 200:
+        robots_parser.parse(robots.get("text", "").splitlines())
     sitemap_url = config.get("sitemap_url") or urljoin(start, "/sitemap.xml")
-    sitemap_status, sitemap_urls = collect_sitemap_urls(sitemap_url, host)
+    sitemap_status, sitemap_urls = collect_sitemap_urls(
+        sitemap_url,
+        host,
+        allowed_sitemap_hosts=sitemap_hosts,
+        allow_private_network=allow_private_network,
+    )
     seeds = [start, *sitemap_urls, *config.get("seed_urls", [])]
     queue = deque(filter(None, (normalize_url(urljoin(start, url), host) for url in seeds)))
-    seen, pages = set(), []
+    seen, pages, robots_blocked = set(), [], []
+    sitemap_set = set(filter(None, sitemap_urls))
     max_pages = min(int(config.get("max_crawl_pages", 100)), 500)
     while queue and len(pages) < max_pages:
         url = queue.popleft()
         if url in seen:
             continue
         seen.add(url)
-        page = parse_page(fetch(url), host)
-        page["in_sitemap"] = url in set(filter(None, sitemap_urls))
+        if config.get("respect_robots_txt", True) and robots.get("status") == 200 and not robots_parser.can_fetch(HEADERS["User-Agent"], url):
+            robots_blocked.append(url)
+            continue
+        page = parse_page(fetch(url, allowed_hosts=site_hosts, allow_private_network=allow_private_network), host)
+        page["in_sitemap"] = url in sitemap_set
         pages.append(page)
         if page.get("status") == 200:
             queue.extend(link for link in page["internal_links"] if link not in seen)
         time.sleep(float(config.get("crawl_delay_seconds", 0.1)))
-    return pages, {"status": robots.get("status"), "url": robots.get("final_url")}, {"status": sitemap_status, "url": sitemap_url, "urls": sitemap_urls}
+    return pages, {"status": robots.get("status"), "url": robots.get("final_url"), "blocked_urls": robots_blocked}, {"status": sitemap_status, "url": sitemap_url, "urls": sitemap_urls}
 
 
 def run_apify_serp(config: dict, output_dir: Path) -> list[dict]:
@@ -148,8 +318,17 @@ def run_apify_serp(config: dict, output_dir: Path) -> list[dict]:
         "saveHtml": False, "includeUnfilteredResults": False,
     }
     endpoint = "https://api.apify.com/v2/acts/apify~google-search-scraper/run-sync-get-dataset-items"
-    response = requests.post(endpoint, params={"token": token, "timeout": 300}, json=payload, timeout=330)
-    response.raise_for_status()
+    response = requests.post(
+        endpoint,
+        params={"timeout": 300},
+        headers={"Authorization": f"Bearer {token}"},
+        json=payload,
+        timeout=330,
+    )
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as exc:
+        raise RuntimeError(f"Apify SERP request failed with HTTP {response.status_code}.") from exc
     rows = response.json()
     (output_dir / "apify-serp-raw.json").write_text(json.dumps(rows, indent=2, ensure_ascii=False), encoding="utf-8")
     return rows
@@ -210,11 +389,7 @@ def collect_clarity_evidence(config: dict, output_dir: Path) -> dict | None:
     export_path = settings.get("export_path") or os.getenv("CLARITY_EXPORT_PATH")
     try:
         if export_path:
-            raw = json.loads(Path(export_path).read_text(encoding="utf-8"))
-            if isinstance(raw, dict) and raw.get("source") == "Microsoft Clarity Data Export API" and raw.get("report_section"):
-                export = raw
-            else:
-                export = normalize_clarity_export(raw, num_days, dimensions)
+            export = load_saved_clarity_export(Path(export_path), num_days, dimensions)
         else:
             token = os.getenv(settings.get("token_env", "CLARITY_API_TOKEN"))
             if not token:
@@ -280,18 +455,33 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
     baseline, candidates = normalize_serps(serp_items, target_host)
     competitors = classify(candidates, config)
     findings = build_findings(pages, sitemap, target_host)
-    performance = [collect_performance(config["website_url"], strategy, output_dir, os.getenv("PAGESPEED_API_KEY")) for strategy in ("mobile", "desktop")] if config.get("performance", {}).get("enabled", True) else []
+    performance_settings = config.get("performance", {})
+    performance = [
+        collect_performance(
+            config["website_url"],
+            strategy,
+            output_dir,
+            os.getenv("PAGESPEED_API_KEY"),
+            performance_settings.get("allow_local_lighthouse", False) is True,
+        )
+        for strategy in ("mobile", "desktop")
+    ] if performance_settings.get("enabled", True) else []
     clarity = collect_clarity_evidence(config, output_dir)
     ledger = EvidenceLedger()
-    ledger.add(source_type="crawl", source_name="Native crawl", source_url=config["website_url"], method="requests + HTML parser", scope=f"{len(pages)} URLs", label="Confirmed", artifact_path=str(output_dir / "audit-data.json"))
+    ledger.add(source_type="crawl", source_name="Native crawl", source_url=config["website_url"], method="IP-pinned HTTP + HTML parser", provenance="direct_observation", scope=f"{len(pages)} URLs", label="Confirmed", artifact_path=str(output_dir / "audit-data.json"))
     if baseline:
-        ledger.add(source_type="serp", source_name="Apify Google Search Scraper", actor_id="apify/google-search-scraper", method="top-10 one-time sample", scope=f"{len(baseline)} queries", label="Live SERP sample", artifact_path=str(output_dir / "apify-serp-raw.json"))
+        ledger.add(source_type="serp", source_name="Apify Google Search Scraper", actor_id="apify/google-search-scraper", method="top-10 one-time sample", provenance="authenticated_api", scope=f"{len(baseline)} queries", label="Live SERP sample", artifact_path=str(output_dir / "apify-serp-raw.json"))
     if clarity and clarity.get("evidence_label") == "First-party verified":
         ledger.add(
             source_type="behavior analytics",
             source_name="Microsoft Clarity Data Export API",
             source_url=clarity.get("source_url", ""),
-            method="authenticated project export",
+            method=(
+                "owner-supplied dated export"
+                if clarity.get("provenance") == "owner_export"
+                else "authenticated project export"
+            ),
+            provenance=clarity.get("provenance", "unknown"),
             scope=f"Previous {clarity.get('num_days')} day(s); dimensions: {', '.join(clarity.get('dimensions') or []) or 'none'}",
             label="First-party verified",
             artifact_path=str(output_dir / "clarity-live-insights.json"),
@@ -330,9 +520,18 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
         (output_dir / "audit-comparison.json").write_text(json.dumps(comparison, indent=2, ensure_ascii=False), encoding="utf-8")
     payload = report_payload(config, audit)
     (output_dir / "report-input.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    pdf_path = output_dir / "beyond-seo-audit.pdf"
+    qa_path = output_dir / "beyond-seo-audit.qa.json"
     if build_report:
-        build_pdf(payload, output_dir / "beyond-seo-audit.pdf")
-    return {"audit": str(audit_path.resolve()), "pages": len(pages), "queries": len(baseline), "findings": len(findings), "pdf": str((output_dir / "beyond-seo-audit.pdf").resolve()) if build_report else None}
+        build_and_validate_pdf(payload, pdf_path, qa_path)
+    return {
+        "audit": str(audit_path.resolve()),
+        "pages": len(pages),
+        "queries": len(baseline),
+        "findings": len(findings),
+        "pdf": str(pdf_path.resolve()) if build_report else None,
+        "pdf_qa": str(qa_path.resolve()) if build_report else None,
+    }
 
 
 def main() -> None:

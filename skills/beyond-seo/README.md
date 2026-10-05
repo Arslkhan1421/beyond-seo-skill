@@ -1,6 +1,6 @@
 ## Apify-First Release Note
 
-Beyond SEO 1.3.0 uses an evidence-led reusable audit runtime with Apify as the primary optional intelligence layer. It asks for only `APIFY_API_TOKEN` by default, can optionally import authenticated Microsoft Clarity behavior evidence, records provenance, qualifies realistic competitors, compares dated audits, falls back from PageSpeed to local Lighthouse, and validates report PDFs.
+Beyond SEO 1.3.0 uses an evidence-led reusable audit runtime with Apify as the primary optional intelligence layer. It asks for only `APIFY_API_TOKEN` by default, can optionally import authenticated Microsoft Clarity behavior evidence, records provenance, qualifies realistic competitors, compares dated audits, supports an explicit opt-in local Lighthouse fallback for trusted targets, and validates report PDFs.
 
 Other APIs should not be requested up front. They are only optional later if Apify cannot fetch the needed data or if a private authenticated account/export is required.
 

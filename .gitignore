@@ -1,3 +1,5 @@
 .env
 *.env
 skill-packages/
+__pycache__/
+*.py[cod]

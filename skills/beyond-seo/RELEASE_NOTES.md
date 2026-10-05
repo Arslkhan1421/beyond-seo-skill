@@ -5,11 +5,11 @@ This release adds:
 - reusable configuration-driven crawl and SERP audit runner;
 - machine-readable JSON/CSV evidence ledger with proprietary-metric safeguards;
 - realistic competitor classifier that separates comparable, content, and excluded domains;
-- dated audit comparison with New, Improved, Changed, Unchanged, Resolved, and Reopened states;
-- PageSpeed collection with local Lighthouse fallback and plain-language failures;
-- permanent PDF builder QA for blank pages, broken bars, and replacement characters;
-- optional Microsoft Clarity Data Export API integration with evidence-safe behavior metrics, privacy gates, source classification, import template, and PDF reporting;
-- concise 223-line skill router, agent metadata, configuration template, fixtures, and automated tests.
+- dated audit comparison with New, Improved, Worsened, Changed, Unchanged, Resolved, and Reopened states;
+- PageSpeed collection with an explicit opt-in local Lighthouse fallback for trusted targets and plain-language failures;
+- automatic, fail-closed PDF builder QA for blank pages, broken bars, and replacement characters;
+- optional Microsoft Clarity Data Export API integration with dated JSON/CSV validation, evidence-safe behavior metrics, privacy gates, source classification, import template, and PDF reporting;
+- concise skill router, agent metadata, configuration template, fixtures, and automated tests.
 
 Older release history follows.
 
