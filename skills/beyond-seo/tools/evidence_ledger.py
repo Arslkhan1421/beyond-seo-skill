@@ -7,24 +7,15 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 
-ALLOWED_LABELS = {
-    "Confirmed",
-    "First-party verified",
-    "Paid-tool verified",
-    "Screenshot verified",
-    "Technical crawl verified",
-    "Live SERP sample",
-    "Live search sample",
-    "Inferred",
-    "Directional",
-    "Not verified",
-}
+EVIDENCE_SCHEMA = json.loads((Path(__file__).resolve().parents[1] / "core" / "evidence-schema.json").read_text(encoding="utf-8"))
+ALLOWED_LABELS = set(EVIDENCE_SCHEMA["labels"])
 RESTRICTED_METRICS = {
     "keyword_volume", "keyword_difficulty", "traffic", "dr", "da",
     "authority_score", "backlinks", "referring_domains", "conversions",
@@ -34,13 +25,7 @@ VERIFIED_LABELS = {
     "Confirmed", "First-party verified", "Paid-tool verified",
     "Screenshot verified", "Technical crawl verified",
 }
-ALLOWED_PROVENANCE = {
-    "Confirmed": {"direct_observation", "deterministic_calculation"},
-    "First-party verified": {"authenticated_api", "owner_export"},
-    "Paid-tool verified": {"authenticated_api", "owner_export"},
-    "Screenshot verified": {"dated_screenshot"},
-    "Technical crawl verified": {"trusted_crawler", "owner_export"},
-}
+ALLOWED_PROVENANCE = {label: set(values) for label, values in EVIDENCE_SCHEMA["labels"].items() if values}
 METRIC_LABELS = {
     "keyword_volume": {"Paid-tool verified"},
     "keyword_difficulty": {"Paid-tool verified"},
@@ -80,7 +65,7 @@ METRIC_SOURCE_TYPES = {
     },
     "conversions": {
         "first_party", "first_party_analytics", "analytics", "crm",
-        "search_console", "behavior_analytics",
+        "behavior_analytics",
     },
     "ai_visibility": {"first_party", "search_console", "paid_tool", "seo_tool"},
 }
@@ -118,13 +103,14 @@ def utc_now() -> str:
 
 
 def stable_id(record: dict[str, Any]) -> str:
-    material = "|".join(str(record.get(key, "")) for key in (
-        "source_name", "source_url", "provenance", "scope", "metric", "value"
-    ))
+    material = json.dumps([record.get(key, "") for key in (
+        "source_name", "source_url", "provenance", "scope", "metric", "value", "collected_at"
+    )], sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
 
 
 def normalize_record(record: dict[str, Any]) -> dict[str, Any]:
+    record = {**record, "collected_at": record.get("collected_at") or utc_now()}
     output = {
         "id": record.get("id") or stable_id(record),
         "collected_at": record.get("collected_at") or utc_now(),
@@ -139,6 +125,13 @@ def normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         "value": record.get("value"),
         "label": record.get("label", "Not verified"),
         "artifact_path": record.get("artifact_path", ""),
+        "artifact_locator": record.get("artifact_locator", ""),
+        "measurement_start": record.get("measurement_start", ""),
+        "measurement_end": record.get("measurement_end", ""),
+        "country": record.get("country", ""),
+        "language": record.get("language", ""),
+        "device": record.get("device", ""),
+        "sample_depth": record.get("sample_depth"),
         "notes": record.get("notes", ""),
     }
     if output["label"] not in ALLOWED_LABELS:
@@ -151,6 +144,12 @@ def normalize_record(record: dict[str, Any]) -> dict[str, Any]:
         )
     metric = canonical_metric(output["metric"])
     if metric in RESTRICTED_METRICS and output["value"] not in (None, "", "Not verified"):
+        try:
+            number = float(output["value"])
+            if not math.isfinite(number) or number < 0 or isinstance(output["value"], bool):
+                raise ValueError
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"Metric '{metric}' requires a finite nonnegative numeric value.") from exc
         supported_labels = METRIC_LABELS.get(metric, VERIFIED_LABELS)
         if output["label"] not in supported_labels:
             raise ValueError(

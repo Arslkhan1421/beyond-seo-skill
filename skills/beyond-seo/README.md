@@ -1,6 +1,23 @@
+# Beyond SEO 1.4.0
+
+Evidence-led SEO audits with traceable findings, bounded crawl coverage, localized SERP observations, normalized first-party validation and repeatable reporting.
+
+Read `SKILL.md` for mode selection and specialist workflows. The deterministic runner is a starter diagnostic; it does not implement every specialist module or establish Google indexation, rendering, rankings or business impact from HTML alone.
+
+Run:
+
+```text
+python -m pip install -r requirements.txt
+python tools/audit_runner.py --config audit-config.json --output-dir output/site-date
+python tools/validate_skill.py
+python -m unittest discover -s tests -v
+```
+
+Copy `templates/audit-config-template.json` outside the skill folder and set the target, limits, services and query set. Designate intended search pages in `priority_urls`; optional `first_party_imports` entries require `input_path` and `metadata_path`. Use a fresh directory for each run. See `core/automation-runtime.md`, `core/scoring-methodology.md`, `integrations/first-party-data-quality.md` and `reporting/implementation-outcomes.md` for contracts and boundaries.
+
 ## Apify-First Release Note
 
-Beyond SEO 1.3.0 uses an evidence-led reusable audit runtime with Apify as the primary optional intelligence layer. It asks for only `APIFY_API_TOKEN` by default, can optionally import authenticated Microsoft Clarity behavior evidence, records provenance, qualifies realistic competitors, compares dated audits, supports an explicit opt-in local Lighthouse fallback for trusted targets, and validates report PDFs.
+Beyond SEO 1.4.0 uses an evidence-led reusable audit runtime with Apify as the primary optional intelligence layer. It asks for only `APIFY_API_TOKEN` by default, can optionally import authenticated Microsoft Clarity behavior evidence, records provenance, qualifies realistic competitors, compares dated audits, supports an explicit opt-in local Lighthouse fallback for trusted targets, and validates report PDFs.
 
 Other APIs should not be requested up front. They are only optional later if Apify cannot fetch the needed data or if a private authenticated account/export is required.
 

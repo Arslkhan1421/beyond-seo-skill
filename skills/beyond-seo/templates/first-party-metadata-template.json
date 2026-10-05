@@ -1,0 +1,14 @@
+{
+  "source": "gsc",
+  "provenance": "owner_export",
+  "property": "sc-domain:example.com",
+  "retrieved_at": "2026-10-05T09:00:00+00:00",
+  "start_date": "2026-09-01",
+  "end_date": "2026-09-30",
+  "timezone": "America/Los_Angeles",
+  "dimensions": ["query"],
+  "filters": {},
+  "search_type": "web",
+  "export_method": "Owner-supplied normalized CSV",
+  "completeness": "Not verified; anonymized queries and export limits may omit rows"
+}

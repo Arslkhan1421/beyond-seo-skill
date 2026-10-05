@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -17,10 +18,20 @@ PSI_URL = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed"
 
 
 def summarize_lighthouse(payload: dict, source: str, strategy: str) -> dict:
-    categories = payload.get("lighthouseResult", payload).get("categories", {})
-    audits = payload.get("lighthouseResult", payload).get("audits", {})
-    score = lambda name: round((categories.get(name, {}).get("score") or 0) * 100) if categories.get(name, {}).get("score") is not None else None
-    numeric = lambda name: audits.get(name, {}).get("numericValue")
+    if not isinstance(payload, dict):
+        raise ValueError("Lighthouse response must be an object.")
+    lighthouse = payload.get("lighthouseResult", payload)
+    if not isinstance(lighthouse, dict):
+        raise ValueError("Lighthouse result must be an object.")
+    categories = lighthouse.get("categories", {})
+    audits = lighthouse.get("audits", {})
+    categories = categories if isinstance(categories, dict) else {}
+    audits = audits if isinstance(audits, dict) else {}
+    valid_score = lambda row: isinstance(row, dict) and not isinstance(row.get("score"), bool) and isinstance(row.get("score"), (int, float)) and math.isfinite(row["score"]) and 0 <= row["score"] <= 1
+    if lighthouse.get("runtimeError") or not any(valid_score(row) for row in categories.values()):
+        raise ValueError("Lighthouse did not complete usable category measurements.")
+    score = lambda name: round(categories[name]["score"] * 100) if valid_score(categories.get(name)) else None
+    numeric = lambda name: audits.get(name, {}).get("numericValue") if isinstance(audits.get(name, {}), dict) else None
     return {
         "status": "verified",
         "source": source,
@@ -48,7 +59,7 @@ def run_pagespeed(url: str, strategy: str, api_key: str | None = None, timeout: 
         if response.status_code == 429:
             return None, "PageSpeed request limit reached."
         return None, f"PageSpeed did not return a usable result ({response.status_code})."
-    except requests.RequestException:
+    except (requests.RequestException, ValueError, TypeError):
         return None, "PageSpeed was unavailable."
 
 
@@ -73,7 +84,7 @@ def run_local(url: str, strategy: str, output_dir: Path, timeout: int = 150) -> 
     try:
         subprocess.run(args, check=True, capture_output=True, text=True, timeout=timeout)
         return summarize_lighthouse(json.loads(output.read_text(encoding="utf-8")), "Local Lighthouse", strategy)
-    except (subprocess.SubprocessError, OSError, json.JSONDecodeError):
+    except (subprocess.SubprocessError, OSError, ValueError, TypeError):
         return None
 
 

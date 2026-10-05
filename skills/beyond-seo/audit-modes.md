@@ -255,7 +255,7 @@ Use:
 
 ```text
 Observed from available pages
-Likely
+Inferred
 Not verified
 Recommended next check
 ```

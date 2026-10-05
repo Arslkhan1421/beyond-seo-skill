@@ -1,0 +1,1 @@
+task_id,finding_id,affected_urls,owner,implementation_date,validation_result,validation_evidence,metric,unit,baseline_start,baseline_end,baseline_value,followup_start,followup_end,followup_value,source,source_label,property,timezone,segment,filters,measurement_evidence,confounders

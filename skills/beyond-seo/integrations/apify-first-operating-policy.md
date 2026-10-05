@@ -65,7 +65,7 @@ Use:
 ```text
 Confirmed
 Directional
-Estimated
+Directional
 Not verified
 ```
 

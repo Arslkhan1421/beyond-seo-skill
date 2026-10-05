@@ -40,12 +40,34 @@ def compare(previous: dict, current: dict) -> dict:
     old = {finding_key(row): row for row in previous.get("findings", previous.get("issues", []))}
     new = {finding_key(row): row for row in current.get("findings", current.get("issues", []))}
     changes = []
+    warnings = []
+    old_context, new_context = previous.get("business_context", {}), current.get("business_context", {})
+    incompatible = False
+    for field in ("website_url", "country_code", "language_code", "device"):
+        if field in old_context and field in new_context and old_context[field] != new_context[field]:
+            incompatible = True
+            warnings.append(f"Different comparison scope: {field}")
+    if previous.get("schema_version") != current.get("schema_version"):
+        warnings.append("Different audit schema versions; score and check definitions may differ.")
+    pages = {page["url"]: page for page in current.get("pages", [])}
+
+    def rechecked(row):
+        urls = row.get("affected_urls", row.get("urls", row.get("evidence", [])))
+        check = row.get("check_id")
+        return bool(check and isinstance(urls, list) and urls and all(
+            url in pages and check in pages[url].get("checks_performed", []) for url in urls if isinstance(url, str)
+        ) and all(isinstance(url, str) for url in urls))
+
     for key in sorted(set(old) | set(new)):
+        if incompatible:
+            changes.append({"id": key, "status": "Not comparable", "previous": old.get(key), "current": new.get(key)})
+            continue
         if key not in old:
             state = "Reopened" if new[key].get("previous_status") == "Resolved" else "New"
             changes.append({"id": key, "status": state, "current": new[key]})
         elif key not in new:
-            changes.append({"id": key, "status": "Resolved", "previous": old[key]})
+            state = "Resolved" if rechecked(old[key]) else "Not rechecked"
+            changes.append({"id": key, "status": state, "previous": old[key], "note": "Resolution requires the same check on every previously affected URL."})
         else:
             old_severity = old[key].get("severity") or old[key].get("priority")
             new_severity = new[key].get("severity") or new[key].get("priority")
@@ -54,9 +76,11 @@ def compare(previous: dict, current: dict) -> dict:
             state = severity_change(old_severity, new_severity)
             if state is None:
                 state = "Changed" if new_severity != old_severity or new_evidence != old_evidence else "Unchanged"
+            if state == "Improved" and old[key].get("check_id") and not rechecked(old[key]):
+                state = "Not rechecked"
             changes.append({"id": key, "status": state, "previous": old[key], "current": new[key]})
-    counts = {status: sum(1 for row in changes if row["status"] == status) for status in ("New", "Improved", "Worsened", "Changed", "Unchanged", "Resolved", "Reopened")}
-    return {"previous_date": previous.get("audit_date"), "current_date": current.get("audit_date"), "summary": counts, "changes": changes}
+    counts = {status: sum(1 for row in changes if row["status"] == status) for status in ("New", "Improved", "Worsened", "Changed", "Unchanged", "Resolved", "Reopened", "Not rechecked", "Not comparable")}
+    return {"previous_date": previous.get("audit_date"), "current_date": current.get("audit_date"), "summary": counts, "changes": changes, "comparability_warnings": warnings}
 
 
 def main() -> None:

@@ -417,8 +417,8 @@ Confidence note
 Every PDF should include a visible data confidence strip near the front:
 
 ```text
-Verified: crawl, sitemap, robots, metadata
-Sampled: live SERP checks
+Confirmed: crawl, sitemap, robots, metadata
+Live SERP sample: live SERP checks
 Inferred: competitor targeting from page content
 Not verified: Semrush/Ahrefs/Moz/DataForSEO metrics, GSC/GA4, backlinks, traffic, conversions
 ```

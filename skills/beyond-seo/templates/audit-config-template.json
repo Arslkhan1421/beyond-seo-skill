@@ -18,6 +18,11 @@
     "secondary service agency usa"
   ],
   "seed_urls": [],
+  "priority_urls": [],
+  "page_templates": {},
+  "exclude_paths": [],
+  "max_discovered_urls": 10000,
+  "first_party_imports": [],
   "respect_robots_txt": true,
   "allowed_sitemap_hosts": [],
   "allow_private_network": false,

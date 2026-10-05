@@ -85,7 +85,7 @@ def evidence_level(source: str, provenance: str | None = None) -> str:
     return "Not verified"
 
 
-def metric_confidence(row: dict[str, str], level: str) -> tuple[str, str]:
+def metric_confidence(row: dict[str, str], level: str, source: str | None = None) -> tuple[str, str]:
     headers = {norm(k): v for k, v in row.items()}
     verified = []
     missing = []
@@ -100,6 +100,8 @@ def metric_confidence(row: dict[str, str], level: str) -> tuple[str, str]:
         "conversions": ["conversions", "key events", "goals"],
     }
     allowed = ALLOWED_METRICS_BY_LEVEL.get(level, {"url"})
+    if norm(source or "") in {"gsc", "google search console", "bing webmaster tools"}:
+        allowed = allowed - {"conversions", "behavior"}
     for metric, names in metric_map.items():
         value = ""
         for name in names:
@@ -128,7 +130,7 @@ def classify(input_path: Path, source: str | None, provenance: str | None = None
     output_rows = []
     counts = Counter()
     for row in rows:
-        verified, missing = metric_confidence(row, level)
+        verified, missing = metric_confidence(row, level, detected)
         enriched = dict(row)
         enriched["detected_source"] = detected
         enriched["provenance"] = provenance or "unknown"

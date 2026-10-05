@@ -2,6 +2,8 @@
 
 How Beyond SEO should use GSC exports or access.
 
+Before analysis, load `integrations/first-party-data-quality.md`. Validate provenance, property, dates, timezone, filters, normalized units, anonymized-query/export limits and canonical URL attribution. GSC does not verify conversions. Average position is not a fixed live rank.
+
 ---
 
 ## Key Data
@@ -15,6 +17,8 @@ When available, also inspect:
 - AI feature impressions for AI Overviews, AI Mode, and Discover generative AI features;
 - pages surfaced in generative AI features;
 - countries, devices, and date trends for generative AI visibility.
+
+These feature-specific checks are conditional: verify current official documentation and the property's actual UI/API/export fields. Do not assume dedicated reports exist or are required for eligibility. Standard Web metrics cannot isolate AI visibility by themselves. Check `core/current-guidance-register.json` for conflicting source wording and disclose unresolved capabilities.
 
 ## Use Cases
 
@@ -37,7 +41,7 @@ Impressions
 Country
 Device
 Date trend
-Likely reason surfaced
+Inferred reason surfaced with supporting evidence
 Recommended improvement
 Confidence
 ```

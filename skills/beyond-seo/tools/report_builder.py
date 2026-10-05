@@ -51,7 +51,8 @@ GRAY = colors.HexColor("#AAB5BA")
 
 def sample_payload() -> dict[str, Any]:
     return {
-        "title": "SEO, AEO and Website Improvement Audit",
+        "title": "SEO, AEO and Website Improvement Audit - Demonstration",
+        "demo": True,
         "client": "Sample Client",
         "site_url": "https://example.com/",
         "audit_date": str(date.today()),
@@ -64,8 +65,8 @@ def sample_payload() -> dict[str, Any]:
             "unverified analytics data."
         ),
         "data_confidence": [
-            {"label": "Verified", "value": "crawl, sitemap, robots, metadata"},
-            {"label": "Sampled", "value": "manual SERP checks"},
+            {"label": "Confirmed", "value": "crawl, sitemap, robots, metadata (demonstration)"},
+            {"label": "Live SERP sample", "value": "manual SERP checks (demonstration)"},
             {"label": "Inferred", "value": "competitor targeting from page content"},
             {"label": "Not verified", "value": "paid-tool metrics, GSC/GA4, backlinks"},
         ],
@@ -217,7 +218,7 @@ STYLES = paragraph_styles()
 
 
 def p(text: Any, style: str = "Bodyx") -> Paragraph:
-    return Paragraph(html.escape(str(text or "")), STYLES[style])
+    return Paragraph(html.escape(str(text if text is not None else "")), STYLES[style])
 
 
 def score_color(score: int | float | None):
@@ -308,6 +309,8 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
         author="Beyond SEO",
     )
     story: list[Any] = []
+    if payload.get("demo"):
+        story.append(p("DEMONSTRATION DATA - illustrative values, not a website audit", "CoverSub"))
 
     story.extend([
         Spacer(1, 1.25 * inch),
@@ -321,7 +324,7 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
             [
                 ["Overall Score", "Status", "Executive Readout"],
                 [
-                    str(payload.get("overall_score", "Not verified")),
+                    str(payload.get("overall_score") if payload.get("overall_score") is not None else "Not verified"),
                     payload.get("status", "Not verified"),
                     payload.get("summary", "No executive summary provided."),
                 ],
@@ -343,8 +346,14 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
         ))
 
     scores = payload.get("scores") or []
+    coverage = payload.get("coverage") or {}
+    if coverage:
+        story.append(p("Audit Coverage and Limits", "H2x"))
+        story.append(p(f"Discovered: {coverage.get('discovered_urls', 'Not verified')} | Attempted: {coverage.get('attempted_urls', 'Not verified')} | Successful: {coverage.get('successful_urls', 'Not verified')} | Rendered: {coverage.get('rendered_urls', 0)}"))
+        story.append(p(f"Scope: {'Partial audit' if coverage.get('partial', True) else 'Observed crawl sample'} | Stop: {coverage.get('stopping_reason', 'Not recorded')}"))
+        story.append(p(coverage.get("limitations", ""), "Smallx"))
     if scores:
-        story.append(p("SEO Health Dashboard", "H1x"))
+        story.append(p("Observed Diagnostic Scorecard", "H1x"))
         rows = [["Area", "Score", "Visual", "Reason"]]
         for row in scores:
             rows.append([
@@ -354,6 +363,10 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
                 row.get("note", ""),
             ])
         story.append(table(rows, [1.45 * inch, 0.85 * inch, 1.3 * inch, 2.75 * inch]))
+    methodology = payload.get("score_methodology") or {}
+    if methodology:
+        story.append(p(f"Rubric {methodology.get('rubric_version')}; tested {methodology.get('tested_checks')} of {methodology.get('eligible_checks')} eligible sample checks; check coverage {methodology.get('check_coverage_percent')}%. Priority URLs carry 3x business weight.", "Smallx"))
+        story.append(table([["Check", "Weight", "Tested", "Passed", "Failed"]] + [[x['label'], x['weight'], x['tested_pages'], x['passed_pages'], x['failed_pages']] for x in methodology.get("checks", [])], [2.55 * inch, 0.7 * inch, 1.0 * inch, 1.05 * inch, 1.05 * inch]))
 
     clarity = payload.get("clarity") or {}
     if clarity:
@@ -409,12 +422,21 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
     findings = payload.get("findings") or []
     if findings:
         story.append(PageBreak())
-        story.append(p("Confirmed Findings", "H1x"))
+        story.append(p("Observed Findings and Review Tasks", "H1x"))
         story.append(table(
             [["Issue", "Evidence", "Priority", "Recommended Fix"]]
             + [[x.get("issue", ""), x.get("evidence", ""), x.get("priority", ""), x.get("fix", "")] for x in findings],
             [1.45 * inch, 2.0 * inch, 0.75 * inch, 2.15 * inch],
         ))
+        for finding in findings:
+            if finding.get("finding_id"):
+                story.append(p(f"{finding['finding_id']} - Evidence and Acceptance", "H2x"))
+                story.append(p(f"Observation ({finding['observation_label']}): {finding['observation']}"))
+                story.append(p(f"Interpretation ({finding['interpretation_label']}): {finding['interpretation']}"))
+                story.append(p(f"Impact: {finding['business_impact']} | Owner: {finding['owner']}"))
+                story.append(p(f"Acceptance: {finding['acceptance_criteria']}"))
+                story.append(p(f"Validate: {finding['validation_method']}"))
+                story.append(p(f"Collected: {finding['collected_at']} | Artifact: {finding['source_artifact']} | Evidence IDs: {', '.join(finding['evidence_ids'][:3])}" , "Smallx"))
 
     keywords = payload.get("keywords") or []
     if keywords:
@@ -453,6 +475,12 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
         ))
 
     gaps = payload.get("data_gaps") or []
+    for quality in payload.get("first_party_quality", []):
+        story.append(p(f"First-Party Data Quality: {quality.get('source', 'Unknown')}", "H2x"))
+        story.append(p(f"{quality.get('evidence_label')} | Rows: {quality.get('row_count', 0)} | Window: {quality.get('metadata', {}).get('start_date', 'Unknown')} to {quality.get('metadata', {}).get('end_date', 'Unknown')}"))
+        story.append(p(json.dumps(quality.get("summary", {}), ensure_ascii=False)))
+        for note in quality.get("errors", []) + quality.get("warnings", []):
+            story.append(p(note, "Smallx"))
     if gaps:
         story.append(p("Data Needed Next", "H1x"))
         story.append(table(
@@ -480,6 +508,11 @@ def build_and_validate_pdf(
     qa_output: Path | None = None,
 ) -> dict[str, Any]:
     from pdf_qa import inspect_pdf
+    if not payload.get("demo"):
+        from audit_quality import validate_report
+        from evidence_ledger import normalize_record
+        records = [normalize_record(row) for row in payload.get("evidence_records", [])]
+        validate_report(payload, records)
 
     build_pdf(payload, output)
     qa_path = qa_output or output.with_suffix(".qa.json")

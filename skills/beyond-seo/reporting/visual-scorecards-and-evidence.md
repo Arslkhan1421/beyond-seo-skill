@@ -4,6 +4,8 @@ Use this file whenever the user asks for a report, client audit, SEO dashboard, 
 
 The goal is to make Beyond SEO reports easier to understand while keeping every score evidence-based.
 
+Read `core/scoring-methodology.md` first. Numeric examples below illustrate visual formatting, not validated site measurements or a required rubric. A partial crawl gets a scoped sample diagnostic with coverage, not an overall SEO score. Unmeasured categories stay Not verified; never use issue-count deductions.
+
 For PDF output, also load:
 
 ```text

@@ -3,7 +3,7 @@ name: beyond-seo
 description: Run evidence-led SEO audits, AEO/GEO and local strategy, technical crawls, live SERP and realistic competitor research, Microsoft Clarity behavior analysis, keyword/rank baselines, content optimization, developer briefs, professional PDF reports, historical comparisons, CSV imports, and optional LinkedIn/Instagram planning. Use for website SEO audits, ranking diagnosis, UX/friction evidence, competitor gaps, content plans, recurring reports, and client-ready deliverables.
 metadata:
   short-description: Evidence-led SEO, AEO/GEO, competitor, content, reporting, and social workflows
-  version: 1.3.0
+  version: 1.4.0
   compatibility: Codex, Claude Projects, OpenClaw, Cursor, MCP-enabled agents, custom file-based agents
 ---
 
@@ -23,6 +23,8 @@ Beyond SEO is an evidence-led SEO operating system. Connect every recommendation
 8. Never store or repeat API tokens in skill files, logs, reports, templates, or final responses.
 9. Run structural PDF QA before delivery and visually inspect rendered pages when rendering tools are available.
 10. Explain unavailable tools plainly; do not expose raw rate-limit codes as client-facing findings.
+11. Distinguish confirmed observations, inferred impact and unknown outcomes. Source verification does not make vendor estimates exact or establish causation.
+12. Report crawl/check coverage and limits before scores. Crawling does not confirm Google rendering or indexation.
 
 ## Evidence labels
 
@@ -39,7 +41,11 @@ Use only these labels:
 - `Directional`: useful estimate or third-party/community actor signal requiring confirmation.
 - `Not verified`: unavailable or unsupported.
 
-For machine-readable provenance, use `tools/evidence_ledger.py`. Restricted numeric metrics require a compatible evidence label, explicit provenance, and a matching `source_type` such as `first_party` or `paid_tool`.
+`core/evidence-schema.json` is the authoritative label and finding contract. For machine-readable provenance, use `tools/evidence_ledger.py`. Restricted numeric metrics require a compatible evidence label, explicit provenance, and a matching source type. Modules must use these same labels; validate with `tools/validate_skill.py` after maintenance.
+
+Every finding needs affected URLs, observation and interpretation with separate labels, evidence IDs/artifact locators, collection time, confidence, business impact, action, acceptance criteria, validation method and owner. Read `core/finding-contract.md`. Missing titles/H1s are source observations; short text, missing canonicals, duplicate text hashes and sitemap omissions require page-purpose/rendered/context review before fixes. Do not infer ranking loss from them.
+
+For changing policies or capabilities, read `core/current-guidance-register.json`, verify relevant official sources and actual account/export fields during the audit, and record conflicts. Do not assume an AI-specific Search Console report exists or that standard Web totals isolate AI visibility.
 
 ## Start sequence
 
@@ -82,7 +88,7 @@ Use uploaded CSV, JSON, XLSX, PDF, or crawler exports. Run `tools/source_classif
 
 When no live access or files exist, provide a clearly labeled plan and exact data request. Do not present site-specific facts.
 
-## Reusable v1.3 runtime
+## Reusable v1.4 runtime
 
 When code execution is available, prefer the deterministic runner over one-off audit scripts.
 
@@ -99,7 +105,9 @@ python tools/audit_runner.py --config audit-config.json --output-dir output/site
 python tools/audit_runner.py --config audit-config.json --output-dir output/current --previous output/previous/audit-data.json
 ```
 
-The runner creates crawl data, a rank baseline, qualified/excluded competitors, performance results, findings, an evidence ledger, comparison data, report input, a PDF, and a structural PDF-QA artifact. Read `core/automation-runtime.md` for artifacts and quality gates.
+The runner creates bounded HTTP crawl observations and coverage, a localized SERP baseline when available, competitor classifications, performance results, traceable findings, evidence ledger, optional normalized GSC/GA4 quality summaries, comparisons, report/PDF QA and a checksum manifest. Its built-in checks are a starter diagnostic, not all specialist audit modules. Read `core/automation-runtime.md` for scope and artifacts. Use a new dated directory for every run; existing audit evidence is not overwritten.
+
+Read `core/scoring-methodology.md` before scoring. The runner's versioned sample rubric reports tested checks, severity weights, owner-designated business importance and coverage; it does not issue an overall SEO score. Unknown checks are excluded and zero evidence yields no score.
 
 If a different runtime is required, preserve the same output schema and evidence rules.
 
@@ -125,6 +133,9 @@ Current Google AI-search guidance does not justify special AI schema, mass doorw
 Load only the modules needed for the request:
 
 - Full audit: `audit/full-site-audit.md`, `audit/technical-seo-audit.md`, `audit/content-quality-audit.md`, `audit/conversion-seo-audit.md`
+- Traffic decline: `audit/traffic-drop-diagnosis.md`
+- First-party data: `integrations/first-party-data-quality.md`; validate normalized exports with `tools/first_party_quality.py`
+- Implementation outcomes: `reporting/implementation-outcomes.md`; use `tools/outcome_tracker.py`
 - Rank baseline/history: `keyword-research/rank-tracker.md`
 - Keyword architecture: `keyword-research/keyword-discovery.md`, `keyword-research/search-intent-analysis.md`, `keyword-research/keyword-to-page-map.md`
 - Competitors: `competitor-research/competitor-deep-dive.md`
@@ -150,13 +161,13 @@ Show excluded domains and reasons internally. Do not silently treat Reddit, Face
 
 A one-time SERP sample is a baseline, not ranking history. Record keyword, country, language, device, date/time, observed depth, position, URL, SERP features, source, and label. Use `Not visible within sampled top N`; never translate that to a fabricated position.
 
-For recurring audits, preserve each dated `audit-data.json` and run `tools/audit_compare.py`. Report findings as New, Improved, Worsened, Changed, Unchanged, Resolved, or Reopened.
+For recurring audits, preserve each dated `audit-data.json` and run `tools/audit_compare.py`. Report findings as New, Improved, Worsened, Changed, Unchanged, Resolved, Reopened, Not rechecked or Not comparable. Resolution requires the same check on every previously affected URL; absence from a partial crawl is not resolution. Explain changes in scope or schema before comparing.
 
 ## Performance
 
 Use `tools/lighthouse_runner.py`. It attempts PageSpeed Insights, then locally installed Lighthouse. If neither completes, report `Not verified`; do not retain stale scores or infer Core Web Vitals.
 
-Field Lighthouse data and lab Lighthouse data are different. Keep CrUX field evidence separate from lab measurements.
+CrUX field data and lab Lighthouse measurements are different. Preserve field window, percentile, device and URL/origin scope separately; a lab result cannot prove field Core Web Vitals.
 
 ## Microsoft Clarity
 
@@ -225,6 +236,11 @@ Before final delivery confirm:
 - comparable competitors are realistic;
 - current and previous findings are not mixed;
 - numeric scores exclude unverified areas;
+- coverage, sampling and rendering limits are explicit; no issue-count score or unsupported sitewide conclusion appears;
+- findings link to saved observations and distinguish observation from interpretation;
+- GSC/GA4 exports have compatible windows, units, definitions and explicit provenance;
+- history does not mark unchecked findings resolved; implementation verification is separate from measured outcome;
+- reproducibility artifacts contain sanitized settings, tool/source versions and checksums, without private raw exports or secrets;
 - technical tasks have acceptance criteria;
 - Clarity findings include the export window, source, evidence label, privacy limits, and no user-level data;
 - social drafts have approval status and no fabricated proof;

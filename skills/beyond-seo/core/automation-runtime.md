@@ -19,6 +19,9 @@ python tools/audit_runner.py --config audit-config.json --output-dir output/curr
 The runner creates:
 
 - `audit-data.json`
+- `crawl-observations.json` and `crawl-coverage.json`
+- `first-party-quality.json` for configured normalized imports
+- `audit-config.sanitized.json` and `reproducibility-manifest.json` with tool/source hashes and artifact checksums
 - `evidence-ledger.json` and `.csv`
 - `competitor-classification.json`
 - `audit-comparison.json` when a previous audit is supplied
@@ -26,7 +29,11 @@ The runner creates:
 - `beyond-seo-audit.pdf`
 - `beyond-seo-audit.qa.json`
 
-Historical findings use `New`, `Improved`, `Worsened`, `Changed`, `Unchanged`, `Resolved`, and `Reopened`. A lower known severity is improved; a higher known severity is worsened; unrecognized severity changes are changed rather than guessed.
+Historical findings also use `Not rechecked` and `Not comparable`. Resolution requires the same check on every previously affected URL. Legacy findings without recorded checks cannot be automatically resolved. A lower known severity requires comparable rechecks before claiming improvement; higher known severity is worsened. Review `core/finding-contract.md` and `core/scoring-methodology.md`.
+
+The runner performs bounded HTTP extraction, not JavaScript rendering or every specialist audit. It preserves slash/scheme variants, records response/header noindex observations and stops crawling when robots availability is unknown. Sitemap XML traversal and frontier limits are disclosed. Page-purpose signals require contextual review. Owner-supplied priority/template mappings are not inferred business value.
+
+Sanitized parsed observations support reproducing built-in checks; full HTML and private raw analytics exports are not bundled. Keep private originals separately when exact replay requires them. Never reuse a prior output directory. Optional SERP failure becomes a data gap; it must not fabricate an empty-site ranking conclusion.
 
 ## Quality gates
 
