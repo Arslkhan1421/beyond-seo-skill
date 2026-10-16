@@ -2,7 +2,7 @@
 
 Do not use issue-count deductions or present a partial crawler as an overall SEO score. Scores are transparent, versioned diagnostic rubrics, not Google measurements or growth predictions. Explain scope and evidence before numbers.
 
-## Runtime rubric 1.5.0
+## Runtime rubric 1.5.1
 
 The runner reports an **Observed sample checks** score and leaves overall SEO score unavailable.
 

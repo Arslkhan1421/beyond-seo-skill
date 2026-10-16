@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5.0",
+  "schema_version": "1.5.1",
   "review_date": "2026-10-15",
   "use_rule": "Recheck applicable official docs and actual account/export capabilities during each audit. Dates describe this review, not perpetual freshness. Preserve conflicting claims until a current authoritative source or account evidence clarifies them.",
   "entries": [

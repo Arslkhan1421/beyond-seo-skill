@@ -1,10 +1,10 @@
 {
   "name": "Beyond SEO",
   "slug": "beyond-seo",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Evidence-led SEO, AEO/GEO, Microsoft Clarity behavior analysis, technical audit, competitor, rank tracking, reporting, and social strategy skill with a reusable automation runtime.",
   "author": "BeyondTahir / PureDesigners",
-  "license": "Internal / client-use friendly",
+  "license": "MIT",
   "status": "Portable offline ingestion, specialist reviews and action-focused reporting",
   "designed_for": [
     "Codex",

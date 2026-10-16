@@ -3,7 +3,7 @@ name: beyond-seo
 description: Run evidence-led SEO audits, AEO/GEO and local strategy, technical crawls, live SERP and realistic competitor research, Microsoft Clarity behavior analysis, keyword/rank baselines, content optimization, developer briefs, professional PDF reports, historical comparisons, CSV imports, and optional LinkedIn/Instagram planning. Use for website SEO audits, ranking diagnosis, UX/friction evidence, competitor gaps, content plans, recurring reports, and client-ready deliverables.
 metadata:
   short-description: Evidence-led SEO, AEO/GEO, competitor, content, reporting, and social workflows
-  version: 1.5.0
+  version: 1.5.1
   compatibility: Codex, Claude Projects, OpenClaw, Cursor, MCP-enabled agents, custom file-based agents
 ---
 
@@ -94,7 +94,7 @@ After maintenance run tools/validate_skill.py and unittest discovery; refresh th
 
 Use this index for exact file discovery; it is not an instruction to load every file.
 
-- Package: `MANIFEST.json`, `PLAYBOOK_DEPTH.md`, `README.md`, `RELEASE_NOTES.md`, `SKILL.md`, `_meta.json`, `requirements.txt`, `skill.json`.
+- Package: `LICENSE`, `MANIFEST.json`, `PLAYBOOK_DEPTH.md`, `README.md`, `RELEASE_NOTES.md`, `SKILL.md`, `_meta.json`, `requirements.txt`, `skill.json`.
 - aeo-geo: `aeo-geo/aeo-geo.md`.
 - agents: `agents/openai.yaml`.
 - audit: `audit/audit.md`, `audit/international-seo-audit.md`.

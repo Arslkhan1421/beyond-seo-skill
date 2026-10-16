@@ -746,7 +746,7 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
     ]
     data_confidence.extend({"label": item["evidence_label"], "value": f"{item.get('source')}: {item.get('row_count', 0)} normalized rows; {'validation passed' if item['passed'] else 'validation failed'}"} for item in first_party)
     audit = {
-        "schema_version": "1.5.0", "audit_date": collected_at,
+        "schema_version": "1.5.1", "audit_date": collected_at,
         "audit_mode": audit_mode,
         "business_context": safe_config(config), "robots": robots, "sitemap": sitemap, "pages": pages,
         "findings": findings, "rank_baseline": baseline, "competitors": competitors,

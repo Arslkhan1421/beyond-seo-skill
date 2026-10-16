@@ -1,13 +1,14 @@
 {
   "package": "Beyond SEO",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "release": "portable offline evidence ingestion, specialist reviews and action-focused reporting",
   "root_folder": "beyond-seo",
-  "actual_files_count": 75,
+  "actual_files_count": 76,
   "ai_friendly_seo": true,
   "apify_first": true,
   "files": [
     "MANIFEST.json",
+    "LICENSE",
     "PLAYBOOK_DEPTH.md",
     "README.md",
     "RELEASE_NOTES.md",

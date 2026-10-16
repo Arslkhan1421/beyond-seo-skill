@@ -1,3 +1,9 @@
+# Beyond SEO 1.5.1 - MIT licensing
+
+- Adds the approved MIT License to the repository and portable skill; metadata and installation guidance are synchronized.
+- The skill now contains 76 packaged files. Existing v1.5.0 archives are unchanged.
+- No audit behavior changes; the existing regression suite applies.
+
 # Beyond SEO 1.5.0 - Portable evidence workflows
 
 - Consolidated topic modules and import headers; original prose retained with source-name headings and a migration map.

@@ -33,4 +33,4 @@ CI checks Python 3.11 and 3.14.
 
 Never include client exports, private audit outputs, credentials, `.env` files or local environments. Use synthetic or properly anonymized fixtures. Follow [security reporting](SECURITY.md) for sensitive findings and the [code of conduct](CODE_OF_CONDUCT.md) when participating.
 
-Existing package usage terms remain unchanged; a pull request does not grant rights over third-party or client material you do not own.
+Contributions must be compatible with the MIT License. Do not submit third-party or client material you do not have permission to contribute.
