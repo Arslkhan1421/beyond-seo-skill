@@ -5,7 +5,7 @@
 
 Evidence-led SEO, AEO/GEO and website audit workflows for AI agents, with deterministic Python analysis and client-ready PDFs.
 
-**Current release: [v1.5.0](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.0)**
+**Current release: [v1.5.1](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.1)**
 
 ## Install
 
@@ -15,11 +15,11 @@ Ask your agent:
 Install the Codex skill from https://github.com/Arslkhan1421/beyond-seo-skill/tree/main/skills/beyond-seo
 ```
 
-For a version-pinned copy, download the ZIP from the [v1.5.0 release](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.0). The skill is in `skills/beyond-seo`. See the [team installation guide](TEAM_INSTALL_Beyond_SEO.md) for installation and upgrades.
+For a version-pinned copy, download the ZIP from the [v1.5.1 release](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.1). The skill is in `skills/beyond-seo`. See the [team installation guide](TEAM_INSTALL_Beyond_SEO.md) for installation and upgrades.
 
-## What v1.5.0 adds
+## What v1.5.1 adds
 
-- A 75-file skill with consolidated topic guides and a complete module index.
+- A 76-file skill with consolidated topic guides and a complete module index.
 - Offline host-agent crawl and SERP snapshots feeding scoring, evidence ledgers and PDF reports.
 - Backlink, URL and bounded XML/gzip sitemap import utilities.
 - Compatible URL-level GSC, GA4 and Clarity synthesis.
@@ -51,7 +51,7 @@ Every report separates observed facts, inferred impact and unavailable data. Cra
 
 API access is optional for offline analysis. Keep credentials in your own environment and client exports outside the distributable. Back up the existing skill and preserve local configuration before upgrading; old paths are mapped in the [migration registry](skills/beyond-seo/core/module-migration.json).
 
-See [release notes](skills/beyond-seo/RELEASE_NOTES.md) for changes and compatibility. Existing package metadata describes usage as “Internal / client-use friendly”; this release does not introduce a new open-source license.
+See [release notes](skills/beyond-seo/RELEASE_NOTES.md) for changes and compatibility. Beyond SEO v1.5.1 is licensed under the [MIT License](LICENSE). Earlier release archives retain their original notices.
 
 ## Project support and contribution
 

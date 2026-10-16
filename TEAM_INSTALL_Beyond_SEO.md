@@ -1,6 +1,6 @@
 # Beyond SEO Skill - Team Install Guide
 
-Current release: [v1.5.0](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.0). Download its ZIP for a fixed version, or use the [one-line install prompt](ONE_LINE_INSTALL_Beyond_SEO.md) for main.
+Current release: [v1.5.1](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.1). Download its ZIP for a fixed version, or use the [one-line install prompt](ONE_LINE_INSTALL_Beyond_SEO.md) for main.
 
 This repository contains the Beyond SEO Codex skill at:
 
@@ -36,7 +36,7 @@ python tools/validate_skill.py
 python -m unittest discover -s tests -v
 ```
 
-Use Python 3.11 or newer. The current skill has 75 packaged files and 108 tests. Review the release checksum before installation.
+Use Python 3.11 or newer. The current skill has 76 packaged files and 108 tests. Review the release checksum before installation.
 
 ## Upgrade an existing installation
 
@@ -77,5 +77,5 @@ Do not commit tokens, `.env` files, private exports, or client data to this repo
 Current packaged skill version:
 
 ```text
-Beyond SEO 1.5.0 - Portable evidence workflows and action-focused reporting
+Beyond SEO 1.5.1 - Portable evidence workflows and action-focused reporting
 ```

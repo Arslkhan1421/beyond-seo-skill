@@ -1,4 +1,4 @@
-# Beyond SEO 1.5.0
+# Beyond SEO 1.5.1
 
 Portable evidence-led SEO workflows and deterministic analysis with client-ready PDFs. Read SKILL.md first for workflows and a complete package index.
 
@@ -15,3 +15,7 @@ Copy templates/audit-config-template.json outside the package. Exact contracts a
 Consolidated guides retain original module prose/headings. core/module-migration.json maps old paths; vendor headers now live in core/import-schemas.json. Schema, query-overlap, backlink and funnel outputs are review candidates, not automated SEO truth or authorization to change a site.
 
 Keep credentials and private client artifacts outside the distributable. Preserve local-only configuration on upgrade and install dependencies in the execution environment. Every report distinguishes observations, inferred impact and unknown outcomes; no ranking, rich-result or ROI guarantees.
+
+## License
+
+MIT. See LICENSE included in this skill. Earlier release archives retain their original notices.
