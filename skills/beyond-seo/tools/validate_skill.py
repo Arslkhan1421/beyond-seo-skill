@@ -36,6 +36,11 @@ def validate(root: Path) -> list[str]:
                 errors.append(f"Missing reference in {path.relative_to(root)}: {reference}")
     manifest = json.loads((root / "MANIFEST.json").read_text(encoding="utf-8"))
     actual = {p.relative_to(root).as_posix() for p in root.rglob("*") if package_file(p)}
+    if len(actual) > 90:
+        errors.append(f'Portable package exceeds 90-file budget: {len(actual)}')
+    unrouted = [name for name in sorted(actual) if f'`{name}`' not in entrypoint]
+    if unrouted:
+        errors.append(f'Files missing from SKILL.md package index: {unrouted}')
     if set(manifest["files"]) != actual or manifest.get("actual_files_count") != len(actual):
         errors.append("Manifest inventory is stale.")
     return errors

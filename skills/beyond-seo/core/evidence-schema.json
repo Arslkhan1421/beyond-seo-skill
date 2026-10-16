@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.5.0",
   "labels": {
     "Confirmed": ["direct_observation", "deterministic_calculation"],
     "First-party verified": ["authenticated_api", "owner_export"],

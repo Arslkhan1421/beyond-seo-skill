@@ -15,6 +15,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Iterable
 
+IMPORT_SCHEMAS = json.loads((Path(__file__).resolve().parents[1] / 'core/import-schemas.json').read_text(encoding='utf-8'))
+
 
 FIRST_PARTY = {
     "gsc", "google search console", "ga4", "google analytics", "gbp",
@@ -59,7 +61,7 @@ def detect_source(path: Path, headers: Iterable[str], explicit: str | None) -> s
     for candidate in candidates:
         if candidate in haystack:
             return candidate
-    if {"clicks", "impressions", "ctr", "position"}.issubset(set(norm(h) for h in headers)):
+    if set(IMPORT_SCHEMAS['normalized']['gsc']['metrics']).issubset(set(norm(h) for h in headers)):
         return "google search console"
     if {"sessions", "users"}.intersection(set(norm(h) for h in headers)) and "conversions" in haystack:
         return "google analytics"

@@ -192,7 +192,14 @@ def fetch(
                     codecs.lookup(encoding)
                 except LookupError:
                     encoding = "utf-8-sig"
-                text = b"".join(chunks).decode(encoding, errors="replace")
+                raw = b"".join(chunks)
+                if raw.startswith(b'\x1f\x8b'):
+                    import gzip, io
+                    with gzip.GzipFile(fileobj=io.BytesIO(raw)) as compressed:
+                        raw = compressed.read(max_bytes + 1)
+                    if len(raw) > max_bytes:
+                        raise ValueError('Decompressed response exceeded audit byte limit.')
+                text = raw.decode(encoding, errors="replace")
                 return {
                     "url": url,
                     "status": response.status,
@@ -207,7 +214,7 @@ def fetch(
                 response.close()
                 connection.close()
         raise ValueError(f"Response exceeded the {MAX_REDIRECTS}-redirect audit limit.")
-    except (OSError, http.client.HTTPException, ssl.SSLError, ValueError) as exc:
+    except (OSError, EOFError, http.client.HTTPException, ssl.SSLError, ValueError) as exc:
         return {"url": url, "status": None, "final_url": current, "headers": {}, "text": "", "error": str(exc), "collected_at": collected_at, "redirect_chain": chain}
 
 
@@ -218,6 +225,9 @@ def parse_page(result: dict, host: str) -> dict:
     canonical_tag = soup.find("link", attrs={"rel": lambda value: value and "canonical" in value})
     meta_description = clean(meta_tag.get("content", "")) if meta_tag else ""
     canonical = canonical_tag.get("href", "") if canonical_tag else ""
+    hreflang = [{'language': tag.get('hreflang', ''), 'url': tag.get('href', '')} for tag in soup.find_all('link', hreflang=True)]
+    from schema_validator import validate as validate_schema
+    schema_review = validate_schema(result.get('text', '')) if result.get('status') == 200 else {'eligibility': 'Not verified', 'issues': []}
     robots_tags = soup.find_all("meta", attrs={"name": re.compile("^(robots|googlebot)$", re.I)})
     robots_text = ", ".join(clean(tag.get("content", "")) for tag in robots_tags)
     headers = requests.structures.CaseInsensitiveDict(result.get("headers", {}))
@@ -261,6 +271,7 @@ def parse_page(result: dict, host: str) -> dict:
         "url": result["url"], "status": result.get("status"), "final_url": result.get("final_url"),
         "title": title, "meta_description": meta_description,
         "canonical": canonical,
+        "hreflang": hreflang, "schema_review": schema_review,
         "robots": robots_text, "x_robots_tag": xrobots, "http_link_header": headers.get("Link", ""),
         "h1": [clean(tag.get_text(" ")) for tag in soup.find_all("h1") if clean(tag.get_text(" "))],
         "h2": [clean(tag.get_text(" ")) for tag in soup.find_all("h2") if clean(tag.get_text(" "))][:15],
@@ -577,6 +588,9 @@ def collect_clarity_evidence(config: dict, output_dir: Path) -> dict | None:
 
 
 def report_payload(config: dict, audit: dict) -> dict:
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    report_date = datetime.fromisoformat(audit['audit_date'].replace('Z', '+00:00')).astimezone(ZoneInfo(config.get('report_timezone', 'UTC'))).date().isoformat()
     pages, findings = audit["pages"], audit["findings"]
     live = [page for page in pages if page.get("status") == 200]
     rubric = audit.get("sample_score") or sample_score(pages, config)
@@ -601,7 +615,7 @@ def report_payload(config: dict, audit: dict) -> dict:
         })
     payload = {
         "title": "Beyond SEO Evidence-Led Audit", "client": config.get("client_name") or urlparse(config["website_url"]).netloc,
-        "site_url": config["website_url"], "audit_date": audit["audit_date"][:10], "audit_mode": audit["audit_mode"],
+        "site_url": config["website_url"], "audit_date": report_date, "audit_mode": audit["audit_mode"],
         "overall_score": None, "status": "Partial audit" if audit.get("coverage", {}).get("partial", True) else "Observed crawl sample",
         "summary": f"Reviewed {len(pages)} URLs, {len(live)} successful pages, {len(audit['rank_baseline'])} live SERP samples, and {len(findings)} prioritized findings.",
         "data_confidence": audit["data_confidence"],
@@ -623,7 +637,7 @@ def report_payload(config: dict, audit: dict) -> dict:
     return payload
 
 
-def run(config: dict, output_dir: Path, previous: Path | None = None, build_report: bool = True) -> dict:
+def run(config: dict, output_dir: Path, previous: Path | None = None, build_report: bool = True, crawl_snapshot_path: Path | None = None, serp_snapshot_path: Path | None = None) -> dict:
     if (output_dir / "audit-data.json").exists() or (output_dir / "reproducibility-manifest.json").exists():
         raise ValueError("Audit output already exists; use a new dated directory to preserve evidence.")
     for key, default, maximum in (("max_crawl_pages", 100, 500), ("max_discovered_urls", 10000, 50000), ("max_serp_queries", 20, 100), ("serp_results_per_query", 10, 10)):
@@ -634,15 +648,25 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
         raise ValueError("crawl_delay_seconds must be between 0 and 60.")
     output_dir.mkdir(parents=True, exist_ok=True)
     collected_at = utc_now()
-    pages, robots, sitemap = crawl(config)
+    offline = crawl_snapshot_path is not None
+    if offline:
+        from snapshot_io import crawl_snapshot
+        pages, robots, sitemap = crawl_snapshot(crawl_snapshot_path, config)
+        config = {**config, 'apify': {'enabled': False}, 'performance': {'enabled': False}, 'clarity': {'enabled': False}}
+    else:
+        pages, robots, sitemap = crawl(config)
     target_host = urlparse(config["website_url"]).netloc.lower().removeprefix("www.")
     gaps = []
     try:
-        serp_items = run_apify_serp(config, output_dir)
+        serp_items = [] if serp_snapshot_path or offline else run_apify_serp(config, output_dir)
     except (RuntimeError, requests.RequestException, ValueError):
         serp_items = []
         gaps.append({"source": "Live SERP", "needed": "SERP collection did not complete; retry in a new dated run. No ranking claims are available."})
-    baseline, candidates = normalize_serps(serp_items, target_host, config, collected_at)
+    if serp_snapshot_path:
+        from snapshot_io import serp_snapshot
+        baseline, candidates = serp_snapshot(serp_snapshot_path, target_host, config, output_dir)
+    else:
+        baseline, candidates = normalize_serps(serp_items, target_host, config, collected_at)
     competitors = classify(candidates, config)
     performance_settings = config.get("performance", {})
     performance = [
@@ -658,7 +682,7 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
     clarity = collect_clarity_evidence(config, output_dir)
     ledger = EvidenceLedger()
     for index, page in enumerate(pages):
-        record = ledger.add(source_type="crawl", source_name="Native HTTP observation", source_url=page["url"],
+        record = ledger.add(source_type="crawl", source_name="Host-agent saved observation" if offline else "Native HTTP observation", source_url=page["url"],
                             collected_at=page["collected_at"], method=page.get("collection_method", "HTTP HTML extraction"),
                             provenance="direct_observation", scope=page["url"], label="Confirmed" if page.get("status") is not None else "Not verified",
                             artifact_path="crawl-observations.json", artifact_locator=f"/{index}", metric="page_observation",
@@ -668,7 +692,8 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
     validate_findings(findings, ledger.records)
     if baseline:
         for index, row in enumerate(baseline):
-            ledger.add(source_type="serp", source_name=row["source"], actor_id="apify/google-search-scraper", method=row["position_definition"], provenance="authenticated_api", scope=row["keyword"], label=row["evidence_label"], artifact_path="apify-serp-raw.json", artifact_locator=f"/{row['artifact_index']}", collected_at=collected_at, country=row["country"], language=row["language"], device=row["device"], sample_depth=row["sample_depth"])
+            host_sample = row.get('provenance') == 'live_observation'
+            ledger.add(source_type="serp", source_name=row["source"], source_url=row.get('source_url', ''), actor_id="" if host_sample else "apify/google-search-scraper", method=row.get('collection_method', row["position_definition"]), provenance="live_observation" if host_sample else "authenticated_api", scope=row["keyword"], label=row["evidence_label"], artifact_path="host-serp-snapshot.json" if host_sample else "apify-serp-raw.json", artifact_locator=f"/queries/{row['artifact_index']}" if host_sample else f"/{row['artifact_index']}", collected_at=row.get('collected_at', collected_at), country=row["country"], language=row["language"], device=row["device"], sample_depth=row["sample_depth"])
     if clarity and clarity.get("evidence_label") == "First-party verified":
         ledger.add(
             source_type="behavior analytics",
@@ -702,10 +727,12 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
             gaps.append({"source": quality["source"], "needed": "; ".join(quality["errors"][:5])})
     clarity_verified = clarity and clarity.get("evidence_label") == "First-party verified"
     audit_mode = "Apify + native crawl" if baseline else "Native crawl"
+    if offline:
+        audit_mode = 'Host-agent saved observations (offline)'
     if clarity_verified:
         audit_mode += " + Microsoft Clarity"
     data_confidence = [
-        {"label": "Confirmed" if any(p.get("status") is not None for p in pages) else "Not verified", "value": f"Native crawl: {len(pages)} attempted URLs; HTTP extraction only"},
+        {"label": "Confirmed" if any(p.get("status") is not None for p in pages) else "Not verified", "value": f"{'Host-agent snapshot' if offline else 'Native crawl'}: {len(pages)} observed URLs; see collection methods and coverage limits"},
         {"label": "Live SERP sample" if any(row["sample_depth"] for row in baseline) else "Not verified", "value": f"{len(baseline)} one-time query records; empty samples do not establish visibility"},
         {
             "label": "First-party verified" if clarity_verified else "Not verified",
@@ -719,7 +746,7 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
     ]
     data_confidence.extend({"label": item["evidence_label"], "value": f"{item.get('source')}: {item.get('row_count', 0)} normalized rows; {'validation passed' if item['passed'] else 'validation failed'}"} for item in first_party)
     audit = {
-        "schema_version": "1.4.0", "audit_date": collected_at,
+        "schema_version": "1.5.0", "audit_date": collected_at,
         "audit_mode": audit_mode,
         "business_context": safe_config(config), "robots": robots, "sitemap": sitemap, "pages": pages,
         "findings": findings, "rank_baseline": baseline, "competitors": competitors,
@@ -729,6 +756,9 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
         "sample_score": sample_score(pages, config), "first_party_quality": first_party,
         "evidence_records": ledger.records, "data_gaps": gaps,
     }
+    from international_checks import analyze as international_analyze
+    audit['international_review'] = international_analyze(pages)
+    (output_dir / 'international-review.json').write_text(json.dumps(audit['international_review'], indent=2), encoding='utf-8')
     audit = sanitize_artifact(audit)
     pages = audit["pages"]
     ledger.records = audit["evidence_records"]
@@ -745,6 +775,7 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
         comparison = compare(json.loads(previous.read_text(encoding="utf-8")), audit)
         (output_dir / "audit-comparison.json").write_text(json.dumps(comparison, indent=2, ensure_ascii=False), encoding="utf-8")
     payload = sanitize_artifact(report_payload(config, audit))
+    payload['specialist_reviews'] = {'international': audit['international_review'], 'schema': [{'url': p['url'], **p['schema_review']} for p in pages if p.get('schema_review', {}).get('issues')]}
     (output_dir / "report-input.json").write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     pdf_path = output_dir / "beyond-seo-audit.pdf"
     qa_path = output_dir / "beyond-seo-audit.qa.json"
@@ -762,13 +793,15 @@ def run(config: dict, output_dir: Path, previous: Path | None = None, build_repo
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the Beyond SEO v1.4 evidence-led audit pipeline.")
+    parser = argparse.ArgumentParser(description="Run the Beyond SEO v1.5 evidence-led audit pipeline.")
     parser.add_argument("--config", required=True, help="Audit configuration JSON.")
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--previous", help="Optional previous audit-data.json.")
     parser.add_argument("--no-pdf", action="store_true")
+    parser.add_argument('--crawl-snapshot', '--pages-json', dest='crawl_snapshot', help='Saved host-agent HTML observations; disables all network collectors.')
+    parser.add_argument('--serp-snapshot', '--serp-json', dest='serp_snapshot', help='Saved ordered organic search observations.')
     args = parser.parse_args()
-    result = run(json.loads(Path(args.config).read_text(encoding="utf-8")), Path(args.output_dir), Path(args.previous) if args.previous else None, not args.no_pdf)
+    result = run(json.loads(Path(args.config).read_text(encoding="utf-8")), Path(args.output_dir), Path(args.previous) if args.previous else None, not args.no_pdf, Path(args.crawl_snapshot) if args.crawl_snapshot else None, Path(args.serp_snapshot) if args.serp_snapshot else None)
     print(json.dumps(result, indent=2))
 
 

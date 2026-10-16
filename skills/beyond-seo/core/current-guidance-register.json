@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.4.0",
-  "review_date": "2026-10-05",
+  "schema_version": "1.5.0",
+  "review_date": "2026-10-15",
   "use_rule": "Recheck applicable official docs and actual account/export capabilities during each audit. Dates describe this review, not perpetual freshness. Preserve conflicting claims until a current authoritative source or account evidence clarifies them.",
   "entries": [
     {
@@ -53,6 +53,24 @@
       "last_verified": null,
       "scope": "Specific business type and location",
       "guidance": "Verify applicable eligibility, address and representation rules before recommending changes."
+    },
+    {
+      "topic": "Structured-data policies",
+      "source_url": "https://developers.google.com/search/docs/appearance/structured-data/sd-policies",
+      "last_verified": "2026-10-15",
+      "guidance": "Markup should represent visible content; automated matching cannot establish eligibility or guarantee appearance."
+    },
+    {
+      "topic": "Product snippet requirements",
+      "source_url": "https://developers.google.com/search/docs/appearance/structured-data/product-snippet",
+      "last_verified": "2026-10-15",
+      "guidance": "Use current feature-specific required/recommended properties; local profiles do not replace Google validation."
+    },
+    {
+      "topic": "Localized page annotations",
+      "source_url": "https://developers.google.com/search/docs/specialty/international/localized-versions",
+      "last_verified": "2026-10-15",
+      "guidance": "Validate ISO language, optional script/region, self/return links; x-default is optional. Unsampled alternates remain unverified."
     }
   ]
 }

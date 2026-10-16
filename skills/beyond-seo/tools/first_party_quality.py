@@ -11,6 +11,8 @@ from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from urllib.parse import urlparse
 
+IMPORT_SCHEMAS = json.loads((Path(__file__).resolve().parents[1] / 'core/import-schemas.json').read_text(encoding='utf-8'))
+
 
 def validate_export(path: Path, metadata: dict, website_url: str | None = None) -> dict:
     errors, warnings = [], []
@@ -43,7 +45,7 @@ def validate_export(path: Path, metadata: dict, website_url: str | None = None) 
     except (ZoneInfoNotFoundError, ValueError, TypeError):
         errors.append("timezone must be a supported IANA timezone.")
     dimensions = metadata.get("dimensions") if isinstance(metadata.get("dimensions"), list) and all(isinstance(dim, str) for dim in metadata.get("dimensions", [])) else []
-    metrics = ["clicks", "impressions", "ctr", "position"] if source == "gsc" else ["sessions", "key_events"]
+    metrics = IMPORT_SCHEMAS['normalized']['gsc' if source == 'gsc' else 'ga4']['metrics']
     numeric_sums = {metric: 0.0 for metric in metrics if metric not in {"ctr", "position"}}
     rows = 0
     keys = set()

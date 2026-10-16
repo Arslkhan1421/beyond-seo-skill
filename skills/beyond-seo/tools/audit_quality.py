@@ -112,7 +112,7 @@ def sample_score(pages: list[dict], config: dict) -> dict:
         checks.append({"check_id": check_id, "label": label, "severity": severity, "weight": weight,
                        "tested_pages": observed, "passed_pages": passed, "failed_pages": observed - passed})
     return {
-        "rubric_version": "1.4.0", "scope": "Observed crawl sample only",
+        "rubric_version": "1.5.0", "scope": "Observed crawl sample only",
         "score": round(100 * earned / possible, 1) if possible else None,
         "earned_weight": earned, "possible_weight": possible,
         "tested_checks": tested, "eligible_checks": eligible,
@@ -175,10 +175,10 @@ def write_reproducibility(output: Path, config: dict, collected_at: str) -> dict
     names = ["audit-data.json", "crawl-observations.json", "crawl-coverage.json", "evidence-ledger.json",
              "evidence-ledger.csv", "report-input.json", "competitor-classification.json", "audit-comparison.json",
              "first-party-quality.json", "audit-config.sanitized.json", "apify-serp-raw.json",
-             "clarity-live-insights.json", "beyond-seo-audit.pdf", "beyond-seo-audit.qa.json"]
+             "clarity-live-insights.json", "host-serp-snapshot.json", "international-review.json", "beyond-seo-audit.pdf", "beyond-seo-audit.qa.json"]
     artifacts = [{"path": name, "sha256": hashlib.sha256((output / name).read_bytes()).hexdigest(),
                   "bytes": (output / name).stat().st_size} for name in names if (output / name).is_file()]
-    payload = {"schema_version": "1.4.0", "collected_at": collected_at, "python": platform.python_version(),
+    payload = {"schema_version": "1.5.0", "collected_at": collected_at, "python": platform.python_version(),
                "packages": packages, "artifacts": artifacts,
                "source_code_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(Path(__file__).parent.glob("*.py"))},
                "limitations": "Contains parsed observations and sanitized exports; original private source exports and full HTML are not bundled. Query parameters are redacted from persisted config; preserve private originals locally if exact replay needs them."}
