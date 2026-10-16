@@ -1,37 +1,9 @@
-# One-Line Install Prompt
-
-After this project is pushed to GitHub, give your team one line like this:
+# Install Beyond SEO
 
 ```text
-Install the Codex skill from https://github.com/YOUR_ORG/YOUR_REPO/tree/main/skills/beyond-seo
+Install the Codex skill from https://github.com/Arslkhan1421/beyond-seo-skill/tree/main/skills/beyond-seo
 ```
 
-That is it.
+For a fixed version, use the ZIP from the [v1.5.0 release](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.0).
 
-Codex should use the `skill-installer` skill, download the folder from GitHub, and install it into:
-
-```text
-~/.codex/skills/beyond-seo
-```
-
-For Windows, that means:
-
-```text
-C:\Users\THEIR_USERNAME\.codex\skills\beyond-seo
-```
-
-After install, they should restart Codex so the new skill is picked up.
-
-## Example
-
-If your repo is:
-
-```text
-https://github.com/puredesigners/beyond-seo-skill
-```
-
-The install line is:
-
-```text
-Install the Codex skill from https://github.com/puredesigners/beyond-seo-skill/tree/main/skills/beyond-seo
-```
+The installed entrypoint belongs at `~/.codex/skills/beyond-seo/SKILL.md` (`%USERPROFILE%\.codex\skills\beyond-seo\SKILL.md` on Windows). Back up an existing installation, preserve local-only configuration, install the Python requirements and validate the installed version. See [team installation](TEAM_INSTALL_Beyond_SEO.md).

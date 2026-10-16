@@ -14,6 +14,8 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import re
+from urllib.parse import urlsplit
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -31,6 +33,9 @@ try:
         Spacer,
         Table,
         TableStyle,
+        Flowable,
+        Image,
+        KeepTogether,
     )
 except Exception as exc:  # pragma: no cover - runtime dependency message
     raise SystemExit(
@@ -44,6 +49,7 @@ MUTED = colors.HexColor("#5B6870")
 SOFT = colors.HexColor("#F4F8FA")
 LINE = colors.HexColor("#DDE6EA")
 GREEN = colors.HexColor("#1F8A70")
+ACCENT = colors.HexColor("#26B8A5")
 AMBER = colors.HexColor("#C77D0E")
 RED = colors.HexColor("#B94040")
 GRAY = colors.HexColor("#AAB5BA")
@@ -150,7 +156,7 @@ def paragraph_styles():
         fontSize=27,
         leading=32,
         textColor=BRAND,
-        alignment=TA_CENTER,
+        alignment=TA_LEFT,
         spaceAfter=14,
     ))
     styles.add(ParagraphStyle(
@@ -159,10 +165,11 @@ def paragraph_styles():
         fontSize=11,
         leading=15,
         textColor=MUTED,
-        alignment=TA_CENTER,
+        alignment=TA_LEFT,
     ))
     styles.add(ParagraphStyle(
         name="H1x",
+        keepWithNext=True,
         parent=styles["Heading1"],
         fontName="Helvetica-Bold",
         fontSize=17,
@@ -173,6 +180,7 @@ def paragraph_styles():
     ))
     styles.add(ParagraphStyle(
         name="H2x",
+        keepWithNext=True,
         parent=styles["Heading2"],
         fontName="Helvetica-Bold",
         fontSize=12,
@@ -184,8 +192,8 @@ def paragraph_styles():
     styles.add(ParagraphStyle(
         name="Bodyx",
         parent=styles["BodyText"],
-        fontSize=9.2,
-        leading=12.6,
+        fontSize=10,
+        leading=14,
         textColor=INK,
         spaceAfter=5,
     ))
@@ -207,8 +215,8 @@ def paragraph_styles():
     styles.add(ParagraphStyle(
         name="TableCell",
         parent=styles["BodyText"],
-        fontSize=7.7,
-        leading=9.8,
+        fontSize=8.5,
+        leading=12,
         textColor=INK,
     ))
     return styles
@@ -218,7 +226,19 @@ STYLES = paragraph_styles()
 
 
 def p(text: Any, style: str = "Bodyx") -> Paragraph:
-    return Paragraph(html.escape(str(text if text is not None else "")), STYLES[style])
+    raw = str(text if text is not None else "").translate({0x2010: '-', 0x2011: '-', 0x2013: '-', 0x2014: '-'})
+    parts = re.split(r'(https?://[^\s<>"\']+)', raw)
+    escaped = ''.join(f'<link href="{html.escape(part, quote=True)}" color="#16776C">{html.escape(part)}</link>' if part.startswith(('https://', 'http://')) else html.escape(part) for part in parts)
+    return Paragraph(escaped, STYLES[style])
+
+
+class ReportDocument(SimpleDocTemplate):
+    def afterFlowable(self, flowable):
+        if isinstance(flowable, Paragraph) and flowable.style.name == 'H1x':
+            key = f'section-{self.page}-{getattr(self, "section_count", 0)}'
+            self.section_count = getattr(self, 'section_count', 0) + 1
+            self.canv.bookmarkPage(key)
+            self.canv.addOutlineEntry(flowable.getPlainText(), key, 0)
 
 
 def score_color(score: int | float | None):
@@ -231,7 +251,7 @@ def score_color(score: int | float | None):
     return RED
 
 
-def score_bar(score: int | float | None, width: int = 118, height: int = 8) -> Table:
+def score_bar(score: int | float | None, width: int = 78, height: int = 8) -> Table:
     if score is None:
         filled = 1
     else:
@@ -259,12 +279,12 @@ def table(rows: list[list[Any]], widths: list[float], header: bool = True) -> Ta
         style = "TableHead" if idx == 0 and header else "TableCell"
         data.append([item if hasattr(item, "wrap") else p(item, style) for item in row])
     commands = [
-        ("GRID", (0, 0), (-1, -1), 0.35, LINE),
+        ("LINEBELOW", (0, 0), (-1, -1), 0.35, LINE),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 6),
         ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 9),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
     ]
     if header:
         commands.extend([
@@ -274,7 +294,36 @@ def table(rows: list[list[Any]], widths: list[float], header: bool = True) -> Ta
     for idx in range(1 if header else 0, len(data)):
         if idx % 2 == 0:
             commands.append(("BACKGROUND", (0, idx), (-1, idx), colors.HexColor("#FAFCFC")))
-    return Table(data, colWidths=widths, repeatRows=1 if header else 0, style=TableStyle(commands))
+    # Keep every table inside the actual page frame, including nested score bars.
+    available = A4[0] - 1.16 * inch
+    widths = [value * available / sum(widths) for value in widths]
+    return Table(data, colWidths=widths, repeatRows=1 if header else 0, style=TableStyle(commands), spaceAfter=14)
+
+
+class CoverIdentity(Flowable):
+    """Vector brand panel: crisp at any zoom, with no external assets."""
+    def __init__(self):
+        super().__init__()
+        self.width = A4[0] - 1.16 * inch
+        self.height = 112
+
+    def draw(self):
+        c = self.canv
+        c.setFillColor(BRAND)
+        c.roundRect(0, 0, self.width, self.height, 10, fill=1, stroke=0)
+        c.setFillColor(ACCENT)
+        c.rect(22, 76, 30, 4, fill=1, stroke=0)
+        c.setFillColor(colors.white)
+        c.setFont("Helvetica-Bold", 24)
+        c.drawString(22, 40, "BEYOND SEO")
+        c.setFont("Helvetica", 9)
+        c.drawString(22, 22, "SEARCH VISIBILITY / WEBSITE EXPERIENCE / ACTION PLAN")
+
+
+def priority_badge(value):
+    text = str(value or "Not assigned")
+    tone = RED if text.lower() in ("high", "critical") else AMBER if text.lower() == "medium" else BRAND
+    return Paragraph(f'<font color="{tone.hexval()}"><b>{html.escape(text)}</b></font>', STYLES["TableCell"])
 
 
 def footer(canvas, doc):
@@ -283,8 +332,13 @@ def footer(canvas, doc):
     canvas.line(doc.leftMargin, 0.55 * inch, A4[0] - doc.rightMargin, 0.55 * inch)
     canvas.setFont("Helvetica", 7.5)
     canvas.setFillColor(MUTED)
-    canvas.drawString(doc.leftMargin, 0.38 * inch, "Beyond SEO report | evidence-based SEO, AEO, competitor, and conversion audit")
+    canvas.drawString(doc.leftMargin, 0.38 * inch, "BEYOND SEO  /  Evidence-led website audit")
     canvas.drawRightString(A4[0] - doc.rightMargin, 0.38 * inch, f"Page {doc.page}")
+    canvas.setFillColor(BRAND)
+    canvas.setFont("Helvetica-Bold", 8)
+    canvas.drawString(doc.leftMargin, A4[1] - 25, "BEYOND SEO")
+    canvas.setStrokeColor(ACCENT)
+    canvas.line(doc.leftMargin, A4[1] - 33, doc.leftMargin + 34, A4[1] - 33)
     canvas.restoreState()
 
 
@@ -298,7 +352,7 @@ def cover_band(canvas, doc):
 
 def build_pdf(payload: dict[str, Any], output: Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
-    doc = SimpleDocTemplate(
+    doc = ReportDocument(
         str(output),
         pagesize=A4,
         rightMargin=0.58 * inch,
@@ -309,33 +363,55 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
         author="Beyond SEO",
     )
     story: list[Any] = []
+    branding = payload.get('branding') or {}
+    logo = branding.get('logo_path')
+    if logo:
+        local_logo = Path(logo)
+        if not local_logo.is_file() or local_logo.suffix.lower() not in {'.png', '.jpg', '.jpeg'}:
+            raise ValueError('Brand logo must be an existing local PNG or JPEG.')
+        image = Image(str(local_logo))
+        factor = min(120 / image.imageWidth, 45 / image.imageHeight)
+        image.drawWidth, image.drawHeight = image.imageWidth * factor, image.imageHeight * factor
+        image.hAlign = 'LEFT'
+        story.extend([image, Spacer(1, 8)])
+    if branding.get('contact'):
+        story.append(p(branding['contact'], 'Smallx'))
     if payload.get("demo"):
         story.append(p("DEMONSTRATION DATA - illustrative values, not a website audit", "CoverSub"))
 
     story.extend([
-        Spacer(1, 1.25 * inch),
+        Spacer(1, 0.25 * inch),
+        CoverIdentity(),
+        Spacer(1, 0.4 * inch),
         p(payload.get("client", "SEO Audit"), "CoverTitle"),
         p(payload.get("title", "SEO, AEO and Website Improvement Report"), "CoverSub"),
         Spacer(1, 0.16 * inch),
         p(f"Website: {payload.get('site_url', 'Not provided')}", "CoverSub"),
         p(f"Audit date: {payload.get('audit_date', str(date.today()))} | Mode: {payload.get('audit_mode', 'Not specified')}", "CoverSub"),
         Spacer(1, 0.38 * inch),
-        table(
-            [
-                ["Overall Score", "Status", "Executive Readout"],
-                [
-                    str(payload.get("overall_score") if payload.get("overall_score") is not None else "Not verified"),
-                    payload.get("status", "Not verified"),
-                    payload.get("summary", "No executive summary provided."),
-                ],
-            ],
-            [1.15 * inch, 1.2 * inch, 4.0 * inch],
-        ),
+        p("THE AUDIT AT A GLANCE", "H2x"),
+        p(payload.get("summary", "No executive summary provided.")),
+        Spacer(1, 12),
+        table([["Overall score", "Audit status", "Findings / review tasks"],
+               [payload.get("overall_score") if payload.get("overall_score") is not None else "Not verified",
+                payload.get("status", "Not verified"), len(payload.get("findings") or [])]],
+              [1.7 * inch, 2.9 * inch, 1.75 * inch]),
+        p("DECISION GUIDE", "H2x"),
+        p("Read the coverage and evidence first, review the observed findings, then use the action roadmap to assign and validate improvements."),
+        p("Scores describe the measured sample. Unavailable data remains Not verified; recommendations do not guarantee ranking or traffic gains.", "Smallx"),
         PageBreak(),
     ])
 
     story.append(p("Executive Summary", "H1x"))
     story.append(p(payload.get("summary", "No executive summary provided.")))
+    ordered = sorted(payload.get('findings') or [], key=lambda f: {'critical': 0, 'high': 1, 'medium': 2, 'low': 3, 'review': 4}.get(str(f.get('priority', '')).lower(), 5))
+    if ordered:
+        story.append(p('What to Do First', 'H1x'))
+        for index, finding in enumerate(ordered[:3], 1):
+            story.append(p(f"{index}. {finding.get('issue', 'Review finding')}", 'H2x'))
+            story.append(p(finding.get('fix', 'Review evidence before acting.')))
+            story.append(p(f"Owner: {finding.get('owner', 'Unassigned')} | Effort: {finding.get('effort', 'Not verified')} | Dependencies: {finding.get('dependencies', 'Not verified')}", 'Smallx'))
+            story.append(p(f"Validate: {finding.get('validation_method', 'Define acceptance criteria before implementation.')}", 'Smallx'))
 
     confidence = payload.get("data_confidence") or []
     if confidence:
@@ -425,18 +501,26 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
         story.append(p("Observed Findings and Review Tasks", "H1x"))
         story.append(table(
             [["Issue", "Evidence", "Priority", "Recommended Fix"]]
-            + [[x.get("issue", ""), x.get("evidence", ""), x.get("priority", ""), x.get("fix", "")] for x in findings],
+            + [[x.get("issue", ""), x.get("evidence", ""), priority_badge(x.get("priority", "")), x.get("fix", "")] for x in findings],
             [1.45 * inch, 2.0 * inch, 0.75 * inch, 2.15 * inch],
         ))
         for finding in findings:
             if finding.get("finding_id"):
+                card_start = len(story)
+                story.append(table([[finding.get('issue', finding['finding_id']), priority_badge(finding.get('priority'))]], [5.3 * inch, 1.05 * inch], header=False))
                 story.append(p(f"{finding['finding_id']} - Evidence and Acceptance", "H2x"))
+                story.append(p(f"Affected URLs: {', '.join(finding.get('affected_urls', []))}"))
+                story.append(p(f"Action: {finding.get('fix', '')}"))
+                story.append(p(f"Effort: {finding.get('effort', 'Not verified')} | Dependencies: {finding.get('dependencies', 'Not verified')}", 'Smallx'))
                 story.append(p(f"Observation ({finding['observation_label']}): {finding['observation']}"))
                 story.append(p(f"Interpretation ({finding['interpretation_label']}): {finding['interpretation']}"))
                 story.append(p(f"Impact: {finding['business_impact']} | Owner: {finding['owner']}"))
                 story.append(p(f"Acceptance: {finding['acceptance_criteria']}"))
                 story.append(p(f"Validate: {finding['validation_method']}"))
                 story.append(p(f"Collected: {finding['collected_at']} | Artifact: {finding['source_artifact']} | Evidence IDs: {', '.join(finding['evidence_ids'][:3])}" , "Smallx"))
+                card = story[card_start:]
+                del story[card_start:]
+                story.append(KeepTogether(card))
 
     keywords = payload.get("keywords") or []
     if keywords:
@@ -452,7 +536,7 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
                 x.get("action", ""),
                 x.get("confidence", ""),
             ] for x in keywords],
-            [1.2 * inch, 0.8 * inch, 1.05 * inch, 0.75 * inch, 0.75 * inch, 1.25 * inch, 0.55 * inch],
+            [1.1 * inch, 0.72 * inch, 1.0 * inch, 0.72 * inch, 0.72 * inch, 1.15 * inch, 0.85 * inch],
         ))
 
     competitors = payload.get("competitors") or []
@@ -475,10 +559,30 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
         ))
 
     gaps = payload.get("data_gaps") or []
+    specialist = payload.get('specialist_reviews') or {}
+    international = specialist.get('international', {}).get('issues', [])
+    schema_issues = [(row['url'], issue) for row in specialist.get('schema', []) for issue in row.get('issues', [])]
+    if international or schema_issues:
+        story.append(p('Structured Data and International Review', 'H1x'))
+        story.append(p('Review candidates from observed HTML only. These checks do not establish rich-result eligibility, search indexation or ranking impact.'))
+        for issue in international:
+            story.append(p(f"{issue['url']} | {issue['check']} ({issue['label']}): {issue['detail']}", 'Smallx'))
+        for url, issue in schema_issues:
+            story.append(p(f"{url} | {issue['check']} ({issue['label']}): {issue['detail']}", 'Smallx'))
+    if payload.get('outcomes'):
+        from outcome_tracker import assess_outcome
+        story.append(p('Implementation and Observed Outcomes', 'H1x'))
+        for row in payload['outcomes']:
+            outcome = assess_outcome(row)
+            story.append(p(row.get('finding_id', 'Tracked change'), 'H2x'))
+            story.append(p(f"Implementation: {outcome['implementation_status']} | Measurement: {outcome['measurement_status']} | Absolute change: {outcome['absolute_change']} | Causation: {outcome['causal_claim']}"))
+            story.append(p(f"Source: {row.get('source', 'Not verified')} | Before: {row.get('baseline_start', '?')} to {row.get('baseline_end', '?')} | After: {row.get('followup_start', '?')} to {row.get('followup_end', '?')} | Confounders: {row.get('confounders', 'Not verified')}", 'Smallx'))
     for quality in payload.get("first_party_quality", []):
         story.append(p(f"First-Party Data Quality: {quality.get('source', 'Unknown')}", "H2x"))
         story.append(p(f"{quality.get('evidence_label')} | Rows: {quality.get('row_count', 0)} | Window: {quality.get('metadata', {}).get('start_date', 'Unknown')} to {quality.get('metadata', {}).get('end_date', 'Unknown')}"))
-        story.append(p(json.dumps(quality.get("summary", {}), ensure_ascii=False)))
+        summary = quality.get("summary", {})
+        if summary:
+            story.append(table([["Observed metric", "Value"]] + [[str(key).replace('_', ' ').capitalize(), value] for key, value in summary.items()], [3.2 * inch, 3.15 * inch]))
         for note in quality.get("errors", []) + quality.get("warnings", []):
             story.append(p(note, "Smallx"))
     if gaps:
@@ -491,7 +595,6 @@ def build_pdf(payload: dict[str, Any], output: Path) -> None:
 
     sources = payload.get("sources") or []
     if sources:
-        story.append(PageBreak())
         story.append(p("Source Links", "H1x"))
         story.append(table(
             [["Source", "URL"]]

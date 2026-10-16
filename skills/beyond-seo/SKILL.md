@@ -3,7 +3,7 @@ name: beyond-seo
 description: Run evidence-led SEO audits, AEO/GEO and local strategy, technical crawls, live SERP and realistic competitor research, Microsoft Clarity behavior analysis, keyword/rank baselines, content optimization, developer briefs, professional PDF reports, historical comparisons, CSV imports, and optional LinkedIn/Instagram planning. Use for website SEO audits, ranking diagnosis, UX/friction evidence, competitor gaps, content plans, recurring reports, and client-ready deliverables.
 metadata:
   short-description: Evidence-led SEO, AEO/GEO, competitor, content, reporting, and social workflows
-  version: 1.4.0
+  version: 1.5.0
   compatibility: Codex, Claude Projects, OpenClaw, Cursor, MCP-enabled agents, custom file-based agents
 ---
 
@@ -49,201 +49,68 @@ For changing policies or capabilities, read `core/current-guidance-register.json
 
 ## Start sequence
 
-1. Identify the website, target country/location, services/products, and business goal.
-2. Check `APIFY_API_TOKEN` and optional `CLARITY_API_TOKEN` without printing them.
-3. Detect uploaded exports, including Microsoft Clarity JSON/CSV, and available crawl/browser/PDF/spreadsheet tools.
-4. Select the audit mode.
-5. Create or reuse a dated output directory; never overwrite the prior audit used for comparison.
-6. Run the reusable pipeline when code execution is available.
-7. Add specialist analysis from the relevant modules.
-8. Produce the requested report, workbook, social export, and developer brief.
-9. Validate evidence labels, formulas, PDF layout, and data gaps before delivery.
+1. Identify website, audience/location, services and business goal. Inspect saved exports and tool capabilities; never print credentials.
+2. Choose Full Intelligence, Apify Intelligence, Native Agent Scraping, File Analysis or Advisory from actual evidence. Capability detection is not authentication.
+3. Read the relevant guide below and use a fresh dated output directory.
+4. Run the deterministic pipeline and add supported specialist review.
+5. Validate findings, source limitations, coverage, formulas and PDF layout.
 
-## Audit modes
+## Runtime and offline execution
 
-### Full intelligence
-
-Use when crawl/SERP plus first-party and authority data are available. Combine live evidence with GSC, GA4/CRM, Microsoft Clarity, GBP, crawler, and paid-tool exports.
-
-### Apify intelligence
-
-Use when `APIFY_API_TOKEN` exists but first-party exports do not. Start with the official Website Content Crawler and Google Search Scraper. Expand only when needed and credit-safe.
-
-Read:
-
-- `integrations/apify-first-operating-policy.md`
-- `integrations/apify-actor-registry.md`
-- `integrations/apify-workflows.md`
-- `integrations/apify-ai-friendly-seo-workflows.md`
-
-### Native agent scraping
-
-Use browser/search/crawl tools when Apify is missing or unsuitable. Follow `integrations/native-agent-scraping.md` and `integrations/no-paid-seo-intelligence.md`.
-
-### File analysis
-
-Use uploaded CSV, JSON, XLSX, PDF, or crawler exports. Run `tools/source_classifier.py` with an explicit `--provenance` value; filename/header detection alone never grants verified status. For Screaming Frog, Sitebulb, Lumar, or JetOctopus also read `integrations/technical-crawl-imports.md`.
-
-### Advisory
-
-When no live access or files exist, provide a clearly labeled plan and exact data request. Do not present site-specific facts.
-
-## Reusable v1.4 runtime
-
-When code execution is available, prefer the deterministic runner over one-off audit scripts.
-
-1. Copy and edit `templates/audit-config-template.json` outside the skill folder.
-2. Run:
-
+Install requirements.txt; copy templates/audit-config-template.json outside the skill. Set scope, limits and owner-priority URLs.
 ```text
 python tools/audit_runner.py --config audit-config.json --output-dir output/site-date
+python tools/audit_runner.py --config audit-config.json --crawl-snapshot pages.json --serp-snapshot serp.json --output-dir output/site-offline
 ```
+The crawl-snapshot mode disables every network collector; aliases are --pages-json and --serp-json. Saved HTML/serialized DOM needs real source timestamps and collection methods. Unknown HTTP status stays unknown. Read `core/v1.5-workflows.md` for exact input contracts and individual CLI examples.
 
-3. For month-over-month comparison:
+## Workflow routing
 
-```text
-python tools/audit_runner.py --config audit-config.json --output-dir output/current --previous output/previous/audit-data.json
-```
-
-The runner creates bounded HTTP crawl observations and coverage, a localized SERP baseline when available, competitor classifications, performance results, traceable findings, evidence ledger, optional normalized GSC/GA4 quality summaries, comparisons, report/PDF QA and a checksum manifest. Its built-in checks are a starter diagnostic, not all specialist audit modules. Read `core/automation-runtime.md` for scope and artifacts. Use a new dated directory for every run; existing audit evidence is not overwritten.
-
-Read `core/scoring-methodology.md` before scoring. The runner's versioned sample rubric reports tested checks, severity weights, owner-designated business importance and coverage; it does not issue an overall SEO score. Unknown checks are excluded and zero evidence yields no score.
-
-If a different runtime is required, preserve the same output schema and evidence rules.
-
-## Required audit coverage
-
-For a full-depth website audit, cover:
-
-- robots.txt, XML sitemaps, status codes, redirects, preferred host, canonicals, indexability, and crawl depth;
-- titles, meta descriptions, H1/H2 structure, schema, renderability, duplicate content, thin pages, pagination, and internal links;
-- money pages, proof/case studies, service coverage, intent, cannibalization, content clusters, E-E-A-T, and conversion paths;
-- live localized SERP samples, target-page mapping, realistic competitors, content gaps, and rank baseline;
-- AEO/GEO answer quality, entity clarity, source-worthiness, snippet eligibility, and structured data that matches visible content;
-- local landing-page uniqueness, GBP/Maps evidence, NAP/citation consistency, reviews, service areas, and location proof when applicable;
-- backlink/authority findings only when legitimate data exists;
-- PageSpeed/Lighthouse/CrUX findings only when a test succeeds;
-- CTA clarity, forms, calls/bookings, trust, and analytics/CRM measurement gaps.
-- Microsoft Clarity behavior evidence when available: engagement, scroll depth, rage/dead clicks, excessive scrolling, quick backs, script errors, consent/masking, and configured business events.
-
-Current Google AI-search guidance does not justify special AI schema, mass doorway variants, tiny artificial content chunks, or `llms.txt` claims for Google Search. Prefer crawlable, indexed, useful, expert-led content.
-
-## Specialist modules
-
-Load only the modules needed for the request:
-
-- Full audit: `audit/full-site-audit.md`, `audit/technical-seo-audit.md`, `audit/content-quality-audit.md`, `audit/conversion-seo-audit.md`
-- Traffic decline: `audit/traffic-drop-diagnosis.md`
-- First-party data: `integrations/first-party-data-quality.md`; validate normalized exports with `tools/first_party_quality.py`
-- Implementation outcomes: `reporting/implementation-outcomes.md`; use `tools/outcome_tracker.py`
-- Rank baseline/history: `keyword-research/rank-tracker.md`
-- Keyword architecture: `keyword-research/keyword-discovery.md`, `keyword-research/search-intent-analysis.md`, `keyword-research/keyword-to-page-map.md`
-- Competitors: `competitor-research/competitor-deep-dive.md`
-- Content rewrites: `strategy/content-optimizer.md`
-- Developer tickets: `audit/technical-dev-brief.md`
-- AEO/GEO: `aeo-geo/ai-friendly-seo-master-workflow.md`, `aeo-geo/geo-ai-citation-optimization.md`
-- Local SEO: `local-seo/local-landing-pages.md`, `local-seo/map-pack-audit.md`, `local-seo/google-business-profile.md`
-- Backlinks: `backlink-system/backlink-audit.md`, `backlink-system/link-gap-analysis.md`, `backlink-system/toxic-link-risk.md`
-- Reporting: `reporting/report-builder-pro.md`, `reporting/pdf-report-design-system.md`, `reporting/visual-scorecards-and-evidence.md`
-- Microsoft Clarity: `integrations/microsoft-clarity.md`; use `tools/clarity_export.py` for authenticated or saved exports
-- Social strategy: the five files under `social-media/`
-
-## Competitor selection
-
-Use `tools/competitor_classifier.py` on live SERP candidates. Keep two separate groups:
-
-- `Comparable`: realistic businesses competing for the same buyer and service.
-- `Content competitor`: useful ranking page, publisher, or adjacent business but not a commercial benchmark.
-
-Show excluded domains and reasons internally. Do not silently treat Reddit, Facebook, LinkedIn, directories, aggregators, or global platforms as realistic agency competitors.
-
-## Rank tracking
-
-A one-time SERP sample is a baseline, not ranking history. Record keyword, country, language, device, date/time, observed depth, position, URL, SERP features, source, and label. Use `Not visible within sampled top N`; never translate that to a fabricated position.
-
-For recurring audits, preserve each dated `audit-data.json` and run `tools/audit_compare.py`. Report findings as New, Improved, Worsened, Changed, Unchanged, Resolved, Reopened, Not rechecked or Not comparable. Resolution requires the same check on every previously affected URL; absence from a partial crawl is not resolution. Explain changes in scope or schema before comparing.
-
-## Performance
-
-Use `tools/lighthouse_runner.py`. It attempts PageSpeed Insights, then locally installed Lighthouse. If neither completes, report `Not verified`; do not retain stale scores or infer Core Web Vitals.
-
-CrUX field data and lab Lighthouse measurements are different. Preserve field window, percentile, device and URL/origin scope separately; a lab result cannot prove field Core Web Vitals.
-
-## Microsoft Clarity
-
-Treat Clarity as first-party behavior evidence, not ranking evidence. The Data Export API covers only the previous 1–3 days, up to three dimensions, 1,000 rows without pagination, and 10 requests per project per day. Saved JSON/CSV imports must be owner-supplied and dated; the runtime re-sanitizes raw data and rebuilds report sections. Record the UTC retrieval time and window.
-
-Add verified Clarity metrics and page-level friction signals to the PDF under **Microsoft Clarity Behavior Insights**. Do not infer causation, monthly trends, conversions, or SEO scores from short-window signals. Keep recordings, identifiers, and personal data out of reports. Verify consent and masking before recommending broader collection.
-
-## Content and developer output
-
-For every priority page provide, when relevant:
-
-- target intent and page decision: improve, consolidate, redirect, create, or leave unchanged;
-- recommended title, H1, meta description, section outline, FAQs, schema notes, internal links, proof requirements, and CTA copy;
-- claims that require client/subject-matter-expert verification;
-- developer task, affected URLs, business impact, required change, acceptance criteria, validation method, owner, priority, and evidence label.
-
-Do not recommend mass-generated location or query variants without unique demand, operations, and proof.
-
-## Reports and PDFs
-
-Use `tools/report_builder.py` for repeatable audit PDFs or adapt its normalized JSON schema for richer client reports. Run:
-
-```text
-python tools/report_builder.py --input report-input.json --output output/pdf/report.pdf --qa
-```
-
-Report requirements:
-
-- answer-first executive summary;
-- data sources and confidence before scores;
-- observed scorecards that exclude unverified categories;
-- prioritized findings, rank baseline, qualified competitor gaps, direct website text, developer brief, roadmap, and exact data gaps;
-- a Microsoft Clarity behavior section when verified data exists, or an explicit Clarity data gap when it does not;
-- no copied proprietary logos or exact UI replicas;
-- no broken text score bars, unexplained rate-limit codes, clipped tables, or accidental blank pages.
-
-The runner and `report_builder.py` call `tools/pdf_qa.py` automatically and fail closed when structural QA fails; `--qa` remains accepted for command compatibility. Visually inspect rendered pages before delivery when rendering tools are available.
-
-## Social mode
-
-Social output is optional. Only load it when requested.
-
-Read:
-
-- `social-media/social-seo-strategy.md`
-- `social-media/linkedin-post-builder.md`
-- `social-media/instagram-content-builder.md`
-- `social-media/social-calendar-builder.md`
-- `social-media/social-posting-export.md`
-
-Create platform-specific drafts, visual briefs, CTA, target URL, UTM URL, evidence label, approval status, and proof note. Do not claim performance before analytics exist. Do not auto-post without authenticated publishing access and explicit approval.
-
-## Data imports
-
-Templates under `templates/data-imports/` cover GSC, GA4, Microsoft Clarity, Semrush, Ahrefs, Moz, DataForSEO, Screaming Frog, and Sitebulb. Preserve source dates, retrieval windows, dimensions, and database/location fields. Reject incompatible or ambiguous columns instead of guessing.
-
-Use first-party and paid-tool metrics exactly as supplied. Explain that Semrush/Ahrefs/Moz authority, traffic, volume, and difficulty are vendor estimates, not Google measurements.
+Load only needed sections. Consolidated guides retain source-module headings.
+- Audits, traffic drops, rendered checks, WordPress/WooCommerce and migrations: `audit/audit.md`.
+- International: `audit/international-seo-audit.md`; `tools/international_checks.py` checks observed HTML codes, self/return links and canonical conflicts.
+- Schema parity: `tools/schema_validator.py`; local shape/text checks cannot establish Google eligibility.
+- First-party quality, Clarity, Apify and native collection: `integrations/integrations.md`.
+- Funnel review: `tools/funnel_joiner.py`; mismatched dates/segments return no diagnosis.
+- Keyword architecture and ranks: `keyword-research/keyword-research.md`; `tools/cannibalization_check.py` emits query-overlap and link-graph review candidates, never automatic redirects.
+- Competitor qualification: `competitor-research/competitor-research.md`; `tools/competitor_classifier.py`. Separate comparable businesses, content competitors and excluded ecosystems.
+- Backlinks/outreach: `backlink-system/backlink-system.md`; `tools/backlink_classifier.py`. Patterns cannot establish penalties or justify automatic disavow.
+- AEO/GEO/entities/reputation: `aeo-geo/aeo-geo.md`, `entity-seo/entity-seo.md`, `reputation-seo/reputation-seo.md`. No fabricated AI visibility or special-schema guarantees.
+- Local/GBP: `local-seo/local-seo.md`; real eligible presence only.
+- Vertical requirements: `industry-playbooks/industry-playbooks.md`; YMYL claims need qualified review and original proof.
+- Content/growth: `strategy/strategy.md`; prioritize business evidence, dependencies and effort, not invented traffic forecasts.
+- Social planning: `social-media/social-media.md`; no publishing without explicit authorization.
+- PDF design, finding cards, branding and outcomes: `reporting/reporting.md`; `tools/report_builder.py`; `tools/outcome_tracker.py`.
+- Templates: `templates/report-templates.md`; shared vendor/normalized column schemas: `core/import-schemas.json`.
+- Setup, operations and prior paths: `core/operations.md`, `core/module-migration.json`.
 
 ## Completion gate
 
-Before final delivery confirm:
+Distinguish observed facts, interpretations and unavailable data. Report coverage before sample scores. Retain evidence IDs, artifact locators and collection times. Match recommendations to page intent with owners, acceptance criteria and validation. Avoid arbitrary word targets, blanket canonical/noindex changes, automatic consolidation or causal growth claims.
 
-- requested modules were actually used;
-- every metric has a source and evidence label;
-- no unsupported proprietary metric appears;
-- comparable competitors are realistic;
-- current and previous findings are not mixed;
-- numeric scores exclude unverified areas;
-- coverage, sampling and rendering limits are explicit; no issue-count score or unsupported sitewide conclusion appears;
-- findings link to saved observations and distinguish observation from interpretation;
-- GSC/GA4 exports have compatible windows, units, definitions and explicit provenance;
-- history does not mark unchecked findings resolved; implementation verification is separate from measured outcome;
-- reproducibility artifacts contain sanitized settings, tool/source versions and checksums, without private raw exports or secrets;
-- technical tasks have acceptance criteria;
-- Clarity findings include the export window, source, evidence label, privacy limits, and no user-level data;
-- social drafts have approval status and no fabricated proof;
-- spreadsheet formulas contain no errors;
-- PDF QA passes and rendered pages were reviewed;
-- final response links every requested artifact and lists exact data needed next.
+After maintenance run tools/validate_skill.py and unittest discovery; refresh the inventory with tools/build_manifest.py. Preserve local-only configuration during install. Exclude credentials, caches and client artifacts from ZIPs. File limits apply to the distributable, not private output directories.
+
+## Complete package index
+
+Use this index for exact file discovery; it is not an instruction to load every file.
+
+- Package: `MANIFEST.json`, `PLAYBOOK_DEPTH.md`, `README.md`, `RELEASE_NOTES.md`, `SKILL.md`, `_meta.json`, `requirements.txt`, `skill.json`.
+- aeo-geo: `aeo-geo/aeo-geo.md`.
+- agents: `agents/openai.yaml`.
+- audit: `audit/audit.md`, `audit/international-seo-audit.md`.
+- backlink-system: `backlink-system/backlink-source-database.csv`, `backlink-system/backlink-system.md`.
+- competitor-research: `competitor-research/competitor-research.md`.
+- core: `core/current-guidance-register.json`, `core/evidence-schema.json`, `core/finding-contract.md`, `core/import-schemas.json`, `core/module-migration.json`, `core/operations.md`, `core/scoring-methodology.md`, `core/v1.5-workflows.md`.
+- entity-seo: `entity-seo/entity-seo.md`.
+- examples: `examples/examples.md`.
+- industry-playbooks: `industry-playbooks/industry-playbooks.md`.
+- integrations: `integrations/integrations.md`.
+- keyword-research: `keyword-research/keyword-research.md`.
+- local-seo: `local-seo/local-seo.md`.
+- reporting: `reporting/reporting.md`.
+- reputation-seo: `reputation-seo/reputation-seo.md`.
+- social-media: `social-media/social-media.md`.
+- strategy: `strategy/strategy.md`.
+- templates: `templates/audit-config-template.json`, `templates/backlink-prospect-template.csv`, `templates/competitor-matrix-template.csv`, `templates/content-calendar-template.csv`, `templates/first-party-metadata-template.json`, `templates/implementation-outcomes-template.csv`, `templates/issue-log-template.csv`, `templates/keyword-map-template.csv`, `templates/report-templates.md`, `templates/social-posting-30-day-template.csv`.
+- tests: `tests/fixtures/current-audit.json`, `tests/fixtures/previous-audit.json`, `tests/test_reliability.py`, `tests/test_site_checks.py`, `tests/test_tooling.py`, `tests/test_v15.py`.
+- tools: `tools/audit_compare.py`, `tools/audit_quality.py`, `tools/audit_runner.py`, `tools/backlink_classifier.py`, `tools/build_manifest.py`, `tools/cannibalization_check.py`, `tools/check_environment.py`, `tools/clarity_export.py`, `tools/competitor_classifier.py`, `tools/data_io.py`, `tools/evidence_ledger.py`, `tools/first_party_quality.py`, `tools/funnel_joiner.py`, `tools/international_checks.py`, `tools/lighthouse_runner.py`, `tools/normalize_apify_results.py`, `tools/outcome_tracker.py`, `tools/pdf_qa.py`, `tools/report_builder.py`, `tools/schema_validator.py`, `tools/site_checks.py`, `tools/sitemap_extractor.py`, `tools/snapshot_io.py`, `tools/source_classifier.py`, `tools/url_classifier.py`, `tools/validate_skill.py`.

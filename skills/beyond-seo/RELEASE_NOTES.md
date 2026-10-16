@@ -1,3 +1,14 @@
+# Beyond SEO 1.5.0 - Portable evidence workflows
+
+- Consolidated topic modules and import headers; original prose retained with source-name headings and a migration map.
+- Offline host-agent snapshots feed scoring, ledger, findings, specialist checks and PDFs without socket access.
+- Real backlink/URL/sitemap CLIs, bounded gzip/XML imports and consolidated environment detection.
+- Compatible URL-level first-party joins, schema/text parity reviews, query overlap, internal graph and observed hreflang checks.
+- Action-focused PDFs with top actions, finding cards, bookmarks, links, optional logo/contact and separate implementation/outcome tracking.
+- Shared import schemas, package-routing/file-budget validation and regression tests.
+
+Compatibility: install requirements.txt (adds pycountry). Prior paths map through core/module-migration.json. Two Apify detection scripts are replaced by tools/check_environment.py. Header-only CSVs are replaced by core/import-schemas.json. Exact contracts: core/v1.5-workflows.md. No automatic redirects/disavow, causal diagnosis or Google eligibility promises.
+
 # Beyond SEO 1.4.0 Evidence and Measurement Reliability
 
 - Shared evidence schema and package validator enforce consistent labels and routed references.
@@ -78,13 +89,13 @@ This release incorporates the Codex-installed Apify updates and changes the skil
 
 ## Changes
 
-- Added Codex-updated `integrations/apify.md`.
-- Added `integrations/apify-actor-shortlist.md`.
-- Added `integrations/apify-first-operating-policy.md`.
+- Added Codex-updated `integrations/integrations.md#apify`.
+- Added `integrations/integrations.md#apify-actor-shortlist`.
+- Added `integrations/integrations.md#apify-first-operating-policy`.
 - Rewrote onboarding so the skill asks only for `APIFY_API_TOKEN` by default.
 - Updated setup, install, capability detection, audit modes, README, and SKILL.md to prefer Apify first.
 - Added `apify-client` to requirements.
-- Added `tools/apify_start_check.py`.
+- Added `tools/check_environment.py`.
 - Confirmed no API token is stored in the package.
 
 ---
@@ -99,7 +110,7 @@ This release polishes the complete Beyond SEO 1.0 structure for broader AI-agent
 - Synced version metadata to `1.0.1`.
 - Cleaned README language so completed files are not called upcoming.
 - Added `requirements.txt` for optional Python tools.
-- Added `INSTALL_FOR_AGENTS.md` for Codex, Claude, OpenClaw, Cursor, and local agents.
+- Added `core/operations.md#INSTALL_FOR_AGENTS` for Codex, Claude, OpenClaw, Cursor, and local agents.
 - Added `PLAYBOOK_DEPTH.md` to clarify deep modules vs lightweight specialist playbooks.
 - Regenerated `MANIFEST.json` with clean file counts.
 - Kept the full Beyond SEO structure intact.

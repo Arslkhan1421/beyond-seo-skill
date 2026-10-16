@@ -1,0 +1,222 @@
+{
+  "schema_version": "1.5.0",
+  "vendor_templates": {
+    "ahrefs-backlinks": [
+      "Source URL",
+      "Source Title",
+      "Target URL",
+      "Anchor",
+      "DR",
+      "UR",
+      "Referring Domain",
+      "Domain Traffic",
+      "Link Type",
+      "First Seen",
+      "Last Check",
+      "Status",
+      "Language",
+      "Platform",
+      "Source Date"
+    ],
+    "ahrefs-organic-keywords": [
+      "Keyword",
+      "Position",
+      "Previous Position",
+      "Volume",
+      "KD",
+      "Traffic",
+      "Traffic Value",
+      "URL",
+      "Country",
+      "SERP Features",
+      "Top Keyword",
+      "Source Date"
+    ],
+    "dataforseo-serp-export": [
+      "Keyword",
+      "Location",
+      "Language",
+      "Device",
+      "Datetime",
+      "Rank Group",
+      "Rank Absolute",
+      "Domain",
+      "URL",
+      "Title",
+      "Description",
+      "Result Type",
+      "SERP Features",
+      "Is Client Domain",
+      "Source Date"
+    ],
+    "ga4-landing-pages-conversions": [
+      "Landing Page",
+      "Session Source / Medium",
+      "Channel Group",
+      "Users",
+      "Sessions",
+      "Engaged Sessions",
+      "Engagement Rate",
+      "Average Engagement Time",
+      "Key Events",
+      "Conversions",
+      "Total Revenue",
+      "Date Range",
+      "Export Date"
+    ],
+    "gsc-pages": [
+      "Page",
+      "Country",
+      "Device",
+      "Search Appearance",
+      "Clicks",
+      "Impressions",
+      "CTR",
+      "Position",
+      "Date Range",
+      "Export Date"
+    ],
+    "gsc-queries": [
+      "Query",
+      "Page",
+      "Country",
+      "Device",
+      "Search Appearance",
+      "Clicks",
+      "Impressions",
+      "CTR",
+      "Position",
+      "Date Range",
+      "Export Date"
+    ],
+    "microsoft-clarity-live-insights": [
+      "retrieved_at_utc",
+      "window_days",
+      "dimension",
+      "url",
+      "metric_name",
+      "observed_value",
+      "evidence_label",
+      "interpretation",
+      "action"
+    ],
+    "moz-link-metrics": [
+      "URL",
+      "Domain",
+      "Domain Authority",
+      "Page Authority",
+      "Spam Score",
+      "Linking Domains",
+      "Inbound Links",
+      "External Links",
+      "Top Anchor",
+      "Discovered Date",
+      "Source Date"
+    ],
+    "screaming-frog-internal": [
+      "Address",
+      "Content Type",
+      "Status Code",
+      "Status",
+      "Indexability",
+      "Indexability Status",
+      "Title 1",
+      "Title 1 Length",
+      "Meta Description 1",
+      "Meta Description 1 Length",
+      "H1-1",
+      "H1-1 Length",
+      "H2-1",
+      "Word Count",
+      "Canonical Link Element 1",
+      "Inlinks",
+      "Outlinks",
+      "Response Time",
+      "Last Modified",
+      "Hash"
+    ],
+    "semrush-keyword-gap": [
+      "Keyword",
+      "Keyword Type",
+      "Client Position",
+      "Client URL",
+      "Competitor",
+      "Competitor Position",
+      "Competitor URL",
+      "Search Volume",
+      "Keyword Difficulty",
+      "CPC",
+      "Intent",
+      "SERP Features",
+      "Database",
+      "Source Date"
+    ],
+    "semrush-organic-research": [
+      "Keyword",
+      "Position",
+      "Previous Position",
+      "Search Volume",
+      "Keyword Difficulty",
+      "CPC",
+      "URL",
+      "Traffic %",
+      "Traffic Cost %",
+      "Competition",
+      "SERP Features",
+      "Intent",
+      "Database",
+      "Source Date"
+    ],
+    "sitebulb-url-list": [
+      "URL",
+      "Status Code",
+      "Indexability",
+      "Indexability Reason",
+      "Page Title",
+      "Meta Description",
+      "H1",
+      "H2",
+      "Canonical URL",
+      "Robots Directives",
+      "Word Count",
+      "Internal Inlinks",
+      "Internal Outlinks",
+      "Depth",
+      "Content Type",
+      "Response Time",
+      "Issue Count",
+      "High Issues",
+      "Medium Issues",
+      "Low Issues"
+    ]
+  },
+  "normalized": {
+    "gsc": {
+      "metrics": [
+        "clicks",
+        "impressions",
+        "ctr",
+        "position"
+      ],
+      "dimensions": "Declare in metadata; page required for URL joins"
+    },
+    "ga4": {
+      "metrics": [
+        "sessions",
+        "key_events"
+      ],
+      "dimensions": "Declare in metadata; page required for URL joins"
+    },
+    "clarity": {
+      "metrics": [
+        "sessions",
+        "quick_back_sessions",
+        "rage_click_sessions",
+        "dead_click_sessions"
+      ],
+      "dimensions": [
+        "page"
+      ]
+    }
+  }
+}

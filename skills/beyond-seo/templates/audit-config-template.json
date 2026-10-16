@@ -1,5 +1,6 @@
 {
   "client_name": "Example Client",
+  "report_timezone": "UTC",
   "website_url": "https://example.com/",
   "target_country": "USA",
   "country_code": "us",

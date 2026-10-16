@@ -1,5 +1,7 @@
 # Beyond SEO Skill - Team Install Guide
 
+Current release: [v1.5.0](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.0). Download its ZIP for a fixed version, or use the [one-line install prompt](ONE_LINE_INSTALL_Beyond_SEO.md) for main.
+
 This repository contains the Beyond SEO Codex skill at:
 
 ```text
@@ -8,7 +10,7 @@ skills/beyond-seo
 
 ## Install For Codex
 
-Copy the `skills/beyond-seo` folder into your local Codex skills directory.
+For a fresh installation, copy the `skills/beyond-seo` folder into your local Codex skills directory. The commands below assume no existing `beyond-seo` directory. For an upgrade, follow the upgrade procedure below instead of overlaying old files.
 
 Windows:
 
@@ -23,6 +25,26 @@ Mac/Linux:
 mkdir -p ~/.codex/skills
 cp -R ./skills/beyond-seo ~/.codex/skills/beyond-seo
 ```
+
+## Verify installation
+
+Install dependencies and validate from the installed skill directory:
+
+```text
+python -m pip install -r requirements.txt
+python tools/validate_skill.py
+python -m unittest discover -s tests -v
+```
+
+Use Python 3.11 or newer. The current skill has 75 packaged files and 108 tests. Review the release checksum before installation.
+
+## Upgrade an existing installation
+
+1. Back up the entire existing skill outside its installation directory.
+2. Preserve local-only configuration and credentials privately; never upload them with the release.
+3. Replace the managed skill files with the new release. Remove obsolete managed paths listed in the previous manifest only after backup; a simple overlay leaves the consolidated v1.4 modules behind. Use `core/module-migration.json` to locate replacement guides.
+4. Restore needed local configuration without placing private client exports inside the distributable. Never overwrite credentials with package examples.
+5. Install the updated requirements and run the package validator and tests. Keep the backup until validation succeeds.
 
 ## Use The Skill
 
@@ -55,5 +77,5 @@ Do not commit tokens, `.env` files, private exports, or client data to this repo
 Current packaged skill version:
 
 ```text
-Beyond SEO 1.0.4 - 2026 SEO Intelligence and AI-search reporting update
+Beyond SEO 1.5.0 - Portable evidence workflows and action-focused reporting
 ```
