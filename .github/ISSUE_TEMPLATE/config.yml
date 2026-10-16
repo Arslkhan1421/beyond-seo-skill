@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation and input contracts
+    url: https://github.com/Arslkhan1421/beyond-seo-skill/blob/main/skills/beyond-seo/core/v1.5-workflows.md
+    about: Read input schemas, CLI examples and execution boundaries before filing an issue.
+  - name: Security reporting
+    url: https://github.com/Arslkhan1421/beyond-seo-skill/security/policy
+    about: Follow private reporting guidance for sensitive security findings.
