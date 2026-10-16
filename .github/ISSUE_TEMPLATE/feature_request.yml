@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose a focused audit or reporting improvement.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Workflow and problem
+      description: "Who needs this and what concrete audit decision is difficult today?"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Available evidence and constraints
+      description: "Sources, input fields, provenance, offline needs and limits. Do not include private data."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior and alternatives
+      description: "Describe the result, success criteria and how false positives would be avoided."
+    validations:
+      required: true

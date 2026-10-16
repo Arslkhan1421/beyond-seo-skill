@@ -1,9 +1,9 @@
 name: Validate Beyond SEO
 on:
   push:
-    paths: ['skills/beyond-seo/**', '.github/workflows/validate-skill.yml']
+    paths: ['skills/beyond-seo/**', '.github/**', '*.md']
   pull_request:
-    paths: ['skills/beyond-seo/**', '.github/workflows/validate-skill.yml']
+    paths: ['skills/beyond-seo/**', '.github/**', '*.md']
 permissions:
   contents: read
 jobs:

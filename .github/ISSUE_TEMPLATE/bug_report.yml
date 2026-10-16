@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible problem in Beyond SEO.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: "Search existing issues first. Never include tokens, private client data or exploit details; use SECURITY.md for sensitive reports."
+  - type: input
+    id: version
+    attributes:
+      label: Release or commit
+      placeholder: "v1.5.0 or commit SHA"
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: "OS, Python version, agent and execution mode (offline/native/API)."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: "Exact command, synthetic input and steps. Redact credentials and private paths."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and observed behavior
+      description: "Explain the difference, including any evidence-label or false-positive problem."
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Logs and validation
+      description: "Relevant sanitized output, package-validator result and tests already run."

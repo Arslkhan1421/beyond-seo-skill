@@ -1,5 +1,8 @@
 # Beyond SEO
 
+[![Validate Beyond SEO](https://github.com/Arslkhan1421/beyond-seo-skill/actions/workflows/validate-skill.yml/badge.svg)](https://github.com/Arslkhan1421/beyond-seo-skill/actions/workflows/validate-skill.yml)
+[![Latest release](https://img.shields.io/github/v/release/Arslkhan1421/beyond-seo-skill)](https://github.com/Arslkhan1421/beyond-seo-skill/releases/latest)
+
 Evidence-led SEO, AEO/GEO and website audit workflows for AI agents, with deterministic Python analysis and client-ready PDFs.
 
 **Current release: [v1.5.0](https://github.com/Arslkhan1421/beyond-seo-skill/releases/tag/v1.5.0)**
@@ -49,3 +52,11 @@ Every report separates observed facts, inferred impact and unavailable data. Cra
 API access is optional for offline analysis. Keep credentials in your own environment and client exports outside the distributable. Back up the existing skill and preserve local configuration before upgrading; old paths are mapped in the [migration registry](skills/beyond-seo/core/module-migration.json).
 
 See [release notes](skills/beyond-seo/RELEASE_NOTES.md) for changes and compatibility. Existing package metadata describes usage as “Internal / client-use friendly”; this release does not introduce a new open-source license.
+
+## Project support and contribution
+
+- [Report a bug or propose a feature](https://github.com/Arslkhan1421/beyond-seo-skill/issues/new/choose)
+- [Contribution guide](CONTRIBUTING.md)
+- [Community code of conduct](CODE_OF_CONDUCT.md)
+- [Security reporting policy](SECURITY.md)
+- [Download releases and checksums](https://github.com/Arslkhan1421/beyond-seo-skill/releases)
